@@ -82,9 +82,11 @@ flowchart LR
 │   ├── 02c_simulacao_aquacrop.ipynb   AquaCrop-OSPy, uncalibrated
 │   ├── 02d_simulacao_dssat.ipynb      DSSAT CERES-Maize, uncalibrated
 │   ├── 03_modelo_hibrido.ipynb        hybrid ML, generator comparison, conformal intervals, phase analyses, SHAP
+│   ├── 03b_comparacao_algoritmos.ipynb  comparison of ML algorithms (default, shallow, nested tuning)
 │   ├── 04_economia.ipynb              costs (DERAL + CONAB Factor Income) and real monthly prices
 │   ├── 05_risco_decisao.ipynb         margin, SERF, P(loss), CVaR, insurance/ZARC, best date, Brier score
 │   ├── 06_sensibilidade.ipynb         sensitivity scenarios compared with the baseline
+│   ├── 07_material_suplementar.ipynb  builds and compiles the supplementary material (Tables S1–S4, Figs. S1–S2)
 │   ├── modelo_mza.py                  one MZA-FAO cycle: degree-day phenology, Kc, ky, roots, ZARC
 │   ├── modelo_apsim.py · modelo_aquacrop.py · modelo_dssat.py   process-model drivers
 │   ├── rodar_lote.py                  parallel runs with a checkpoint per municipality
@@ -107,14 +109,16 @@ flowchart LR
 | 3 | `03_modelo_hibrido` | simulations, `ibge_pam_milho_pr.csv` | validation tables, out-of-sample predictions, yield quantiles per municipality × year × date |
 | 4 | `04_economia` | DERAL, CONAB, Ipeadata, IPCA | `resultados/custos_milho_safrinha_real.csv`, `resultados/precos_milho_pr_mensal_real.csv` |
 | 5 | `05_risco_decisao` | notebooks 3 and 4, ZARC, PSR | economic risk and best date per municipality |
+| 3b | `03b_comparacao_algoritmos` | `resultados/base_treino_hibrido.parquet` | `resultados/comparacao_algoritmos.csv` |
 | 6 | `06_sensibilidade` | `resultados/sensibilidade/*` | `resultados/sensibilidade_cenarios.csv` |
+| 7 | `07_material_suplementar` | outputs of 03, 03b, 04, 05 | `supplementary.tex` / `.pdf` in the journal template folder |
 
 ## 📂 Data
 
 | File | Source |
 |---|---|
 | `ibge_pam_milho_pr.csv` | IBGE/PAM, SIDRA table 839 — first- and second-season maize per municipality, 2003–2025 |
-| `municipios_pr.csv` | Seat coordinates, altitude, soil available water (DTA) and particle size |
+| `municipios_pr.csv` | Seat coordinates, altitude, soil available water (DTA, from the ANA available water capacity map over cropland) and particle size |
 | `malha_municipios_pr.geojson` | IBGE municipal boundaries |
 | `solo_camadas_pr.csv` | MapBiomas Soil Collection 3 — clay and sand in 10 layers (0–100 cm) |
 | `nhistorico_94.xls` | SEAB/DERAL — second-season maize production cost, seasons 1999/00–2024/25 |

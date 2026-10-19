@@ -232,7 +232,7 @@ já configurado. Nada é commitado sem pedido do autor.
 ## Segunda rodada (19/10/2026): solo, limite do R² e APSIM
 
 ### Solo (notebook 01b)
-- **DTA do balanço hídrico** = média da AWC (asset do autor `projects/fcoliveira/assets/AWC_br`, polígonos
+- **DTA do balanço hídrico** = média da AWC (mapa ANA/UFPR 2021, Atlas Irrigação, 1:250.000, SNIRH 28fe4baa-66f3-4f6b-b0d2-890abf5910c4; asset do autor `projects/fcoliveira/assets/AWC_br`, polígonos
   do mapa de solos, m³ m⁻³ × 1000 = mm m⁻¹) sobre a **lavoura temporária** (MapBiomas Coleção 10, 2024,
   classes 39 e 41) de cada município. Correlação 0,95 com a DTA antiga da sede (`dta_ponto_mm_m`).
 - **Granulometria por camada** (perfil do APSIM): **MapBiomas Solo Coleção 3** (argila/areia em 10 camadas
@@ -468,6 +468,26 @@ PPf, PA, EC, ciclo, ISNA/DEF/EXC/geada/calor/Tmin por fase; APSIM 12; AquaCrop 1
   simulação); as saídas antigas deles seguem em português. 01b, 02, 03, 04, 05, 06 reexecutados.
 - Itens de planilha (DERAL/CONAB) e "Paraná" ficam como na fonte.
 
+## Economia complementar (19/10/2026)
+
+- **Arrependimento da decisão plantar / não plantar** (notebook 05, seção 10; `arrependimento_decisao.csv`).
+  A escolha da data não é verificável (o IBGE não tem data de semeadura); a decisão verificável é semear ou
+  não em cada município-ano, com as previsões fora da amostra: semeia se a margem esperada > 0 (rendimento do
+  modelo × resíduos dos outros anos, preço médio dos outros anos, custo do ano). Resultado: plantar sempre
+  448 R$/ha de arrependimento; todos os modelos 307–338 (A, média histórica, 307 = o menor); L 331; E 333;
+  diferenças entre modelos dentro do ruído (L − E = −3, IC −19; +21). **Prever melhor o rendimento não
+  melhora a decisão binária, dominada por preço e custo do ano**; o modelo importa na escolha da data, onde
+  a física diferencia as alternativas. Observado: 55% dos município-anos com prejuízo (custo operacional).
+- **Prêmio ajustado ao risco** (atuarialmente justo = indenização esperada por município × data): R$ 123/ha
+  em média (P10–P90 94–154) × R$ 169/ha do item fixo da DERAL; valor do seguro/ZARC sobe para R$ 101–129/ha;
+  melhor data igual em 97,6% dos municípios.
+- Reprodutibilidade: o R² por escala (micro/meso/estado) passou para o notebook 03 (`validacao_loyo_modelos.csv`)
+  e a comparação de algoritmos virou o notebook `03b_comparacao_algoritmos.ipynb` (lê
+  `resultados/base_treino_hibrido.parquet`, gravado pelo 03; 30 min; saída `comparacao_algoritmos.csv`). Rodado em 19/10/2026: reproduz exatamente a comparação do scratchpad (SVR aninhado C = 0,3, γ = 0,05 em 22/23 dobras).
+- M&M revisado contra o código (19/10/2026): tendência + efeito do município em duas etapas; B usa
+  severidade do frio; definição de frio/geada reprodutivos; BH começa com perfil cheio; n/N limitado a 0–1;
+  renda de fatores interpolada; grade de τ; cenário de prêmio; nova subseção do arrependimento (eq. 21).
+
 ## Próximos passos
 
 1. Restrição da colheita da soja (05/01 só com soja superprecoce): **vai para a discussão do artigo**
@@ -484,4 +504,24 @@ PPf, PA, EC, ciclo, ISNA/DEF/EXC/geada/calor/Tmin por fase; APSIM 12; AquaCrop 1
 7. ~~README e limpeza~~ → README reescrito em inglês (19/10/2026). Não havia arquivos antigos: o commit do
    autor já continha só o pipeline atual. Avisado: `Artigo_milho/` e o modelo LaTeX estão no .gitignore
    mas foram commitados (públicos) — `git rm -r --cached` fica a critério do autor.
-8. **Próximo: escrita em inglês no modelo LaTeX da revista.**
+8. **Escrita (LaTeX, Wiley JACS)** — Introdução (~1.000 palavras) e Material e Métodos (~3.900 palavras,
+   20 equações, tabela dos modelos A–L) escritos em 19/10/2026. `ref.bib` com 48 referências conferidas no
+   Crossref. **TCCs NÃO são citados** (decisão do autor): servem só como fonte de referências e de texto
+   (texto extraído no scratchpad: `tcc_vitor.txt`, `tcc_artur.txt`). Marcadores [INSERT: ...] a preencher:
+   referências das séries DERAL/CONAB/Ipeadata/IPCA, portaria do ZARC.
+   Barbieri & Tuon (1992) e Anderson & Dillon (1992) entraram sem DOI (conferir). O TeX local não compila
+   o modelo (sem babel-english/biber): compilar no Overleaf. Consensus esgotado até 01/11.
+   Resultados (~2.300 palavras; Figs. 1–8; Tabelas 2–4) e Discussão (~2.300 palavras; 6 subseções) escritos
+   em 19/10/2026, com Figs. em `Wiley.../figures/` (cópia de `figuras/`). Seções separadas (formato do
+   periódico). Referências novas: Schlenker & Roberts (2009), Lobell et al. (2011). Citados como material
+   suplementar ainda inexistente: Tabela S1 (algoritmos, `comparacao_algoritmos.csv`), Fig. S1 (custos e
+   preços), Fig. S2 (confiabilidade P(prejuízo)). Cigarrinha 2022 só como suposição, sem citação.
+   Conclusões (5 itens), Abstract (sem abreviaturas), título, palavras-chave, abreviaturas, Data Availability,
+   Conflict of Interest e Supplementary Information escritos (19/10/2026). Material suplementar gerado pelo
+   notebook `07_material_suplementar.ipynb` → `Wiley.../supplementary.tex` e `supplementary.pdf` (compila no TeX
+   local): Tabelas S1 (algoritmos), S2 (seleção automática), S3 (arrependimento), S4 (27 municípios de 15/03);
+   Figs. S1 (custos/preços), S2 (confiabilidade). Pendências [INSERT]: coautores e ORCID, CEP da UTFPR SH,
+   financiamento/agradecimentos, contribuições CRediT, referências DERAL/CONAB/Ipeadata/IPCA e portaria ZARC.
+9. **Bug corrigido (19/10/2026, notebook 05)**: datas fora do ZARC pagavam o prêmio do seguro sem
+   indenização (o texto dizia o contrário). Agora: sem acesso ao seguro = sem indenização e sem prêmio.
+   Melhor data e valor do seguro não mudaram (só a CE das datas inaptas sobe).
