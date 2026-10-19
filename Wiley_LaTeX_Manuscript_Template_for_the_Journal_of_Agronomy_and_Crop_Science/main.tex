@@ -1,0 +1,853 @@
+\documentclass[10pt,a4paper]{article}
+
+% =========================================================
+% JOURNAL OF AGRONOMY AND CROP SCIENCE
+% Manuscript template inspired by Wiley layout
+%
+% Required files in Overleaf:
+% Journal.png
+% original.png
+% wiley.png
+% ref.bib
+% =========================================================
+
+% =========================================================
+% ENCODING / LANGUAGE
+% =========================================================
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+
+% =========================================================
+% FONT / TYPOGRAPHY
+% =========================================================
+\usepackage{newtxtext,newtxmath}
+\usepackage{microtype}
+\usepackage{xurl}
+\usepackage{graphicx}%
+\usepackage{multirow}%
+\let\Bbbk\relax
+\usepackage{amsmath,amssymb,amsfonts}%
+\let\openbox\relax
+\usepackage{amsthm}%
+\usepackage{mathrsfs}%
+\usepackage[title]{appendix}%
+\usepackage{xcolor}%
+\usepackage{textcomp}%
+\usepackage{manyfoot}%
+\usepackage{booktabs}%
+\usepackage{algorithm}%
+\usepackage{algorithmicx}%
+\usepackage{algpseudocode}%
+\usepackage{listings}%
+
+% For orcid links generation
+\RequirePackage{orcidlink}
+
+
+% =========================================================
+% GRAPHICS / COLORS
+% =========================================================
+\usepackage{graphicx}
+\usepackage{xcolor}
+% =========================================================
+% PAGE GEOMETRY
+% =========================================================
+\usepackage[
+    a4paper,
+    top=1.35cm,
+    bottom=1.45cm,
+    left=1.60cm,
+    right=1.60cm,
+    headheight=14pt,
+    headsep=0.25cm,
+    footskip=0.60cm
+]{geometry}
+
+% =========================================================
+% TEXT / LAYOUT
+% =========================================================
+\usepackage{ragged2e}
+\usepackage{setspace}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{calc}
+
+% =========================================================
+% TABLES / FIGURES
+% =========================================================
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{caption}
+\usepackage{dblfloatfix}
+
+% =========================================================
+% MATH
+% =========================================================
+\usepackage{amsmath}
+
+\usepackage{amsfonts}
+
+% =========================================================
+% HEADER / FOOTER
+% =========================================================
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+
+% =========================================================
+% LINKS
+% =========================================================
+\usepackage{hyperref}
+
+% =========================================================
+% BIBLIOGRAPHY
+% =========================================================
+\usepackage[
+  authordate,
+  backend=biber,
+  natbib=true,
+  doi=true,
+  url=false,
+  isbn=false,
+  giveninits=true,
+  uniquename=false,
+  maxcitenames=2,
+  maxbibnames=99
+]{biblatex-chicago}
+
+\defbibenvironment{bibliography}
+  {\list{}
+    {\setlength{\leftmargin}{0pt}%
+     \setlength{\itemindent}{0pt}%
+     \setlength{\itemsep}{\bibitemsep}%
+     \setlength{\parsep}{\bibparsep}}}
+  {\endlist}
+  {\item}
+
+\DeclareFieldFormat{doi}{%
+  \href{https://doi.org/#1}{https://doi.org/#1}%
+}
+
+\addbibresource{ref.bib}
+
+% =========================================================
+% GRAPHIC PATHS
+% =========================================================
+\graphicspath{{./}{figures/}{images/}}
+
+% =========================================================
+% GENERAL CONFIGURATION
+% =========================================================
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.28em}
+
+\setlength{\columnsep}{0.65cm}
+\setlength{\columnseprule}{0pt}
+
+\setlength{\emergencystretch}{2em}
+
+\linespread{0.98}
+
+\raggedbottom
+
+% =========================================================
+% COLORS
+% =========================================================
+\definecolor{JACGray}{RGB}{230,230,230}
+\definecolor{JACDark}{RGB}{36,32,33}
+\definecolor{JACBlue}{RGB}{0,92,165}
+\definecolor{JACRule}{RGB}{75,75,75}
+
+% =========================================================
+% HYPERREF
+% =========================================================
+\hypersetup{
+    colorlinks=true,
+    linkcolor=JACBlue,
+    citecolor=JACBlue,
+    urlcolor=JACBlue,
+    pdfauthor={Author Name},
+    pdftitle={Manuscript Title}
+}
+
+% =========================================================
+% SECTION TITLES
+% =========================================================
+\titleformat{\section}
+    {\large\bfseries\color{JACDark}}
+    {\thesection\,|}
+    {0.40em}
+    {}
+
+\titleformat{\subsection}
+    {\normalsize\bfseries\color{JACDark}}
+    {\thesubsection\,|}
+    {0.40em}
+    {}
+
+\titleformat{\subsubsection}
+    {\normalsize\bfseries\color{JACDark}}
+    {\thesubsubsection\,|}
+    {0.40em}
+    {}
+
+\titlespacing*{\section}
+    {0pt}
+    {0.85em}
+    {0.25em}
+
+\titlespacing*{\subsection}
+    {0pt}
+    {0.60em}
+    {0.15em}
+
+\titlespacing*{\subsubsection}
+    {0pt}
+    {0.50em}
+    {0.10em}
+
+% =========================================================
+% CAPTIONS
+% =========================================================
+\captionsetup{
+    font=small,
+    labelfont=bf,
+    labelsep=quad,
+    justification=justified,
+    singlelinecheck=false
+}
+
+% =========================================================
+% LISTS
+% =========================================================
+\setlist[itemize]{
+    leftmargin=1.2em,
+    itemsep=0.12em,
+    topsep=0.15em,
+    parsep=0pt
+}
+
+\setlist[enumerate]{
+    leftmargin=1.4em,
+    itemsep=0.12em,
+    topsep=0.15em,
+    parsep=0pt
+}
+
+% =========================================================
+% HEADER / FOOTER — PAGE 2 ONWARD
+% =========================================================
+\pagestyle{fancy}
+
+\fancyhf{}
+
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\fancyhead[L]{%
+    \small\itshape
+    Journal of Agronomy and Crop Science
+}
+
+\fancyhead[R]{%
+    \small
+    \thepage\ of \pageref{LastPage}
+}
+
+\fancyfoot[L]{%
+    \small\itshape
+    Journal of Agronomy and Crop Science
+}
+
+\fancyfoot[R]{%
+    \small
+    \thepage\ of \pageref{LastPage}
+}
+
+% =========================================================
+% ARTICLE TITLE
+% =========================================================
+% USER INPUT: replace the placeholder text below.
+% Journal guidance: use a brief, informative title containing the major keywords.
+% Avoid abbreviations in the title.
+\newcommand{\ArticleTitle}{%
+Insert manuscript title here
+}
+
+% =========================================================
+% AUTHORS
+% =========================================================
+% Add or remove authors as needed.
+% Enter the full names of all authors.
+% Use superscript numbers to link authors to affiliations.
+% Use * for the corresponding author.
+% The journal requires ORCID identifiers.
+% Example ORCID format: \orcid{0000-0000-0000-0000}
+
+\newcommand{\orcid}[1]{%
+  \hspace{1pt}\orcidlink{#1}\hspace{1pt}%
+}
+
+\newcommand{\ArticleAuthors}{%
+First Author\orcid{0000-0000-0000-0000}\textsuperscript{1}
+\;|\;
+Second Author\orcid{0000-0000-0000-0000}\textsuperscript{2}
+\;|\;
+Corresponding Author\orcid{0000-0000-0000-0000}\textsuperscript{1,*}
+}
+
+
+% =========================================================
+% AFFILIATIONS
+% =========================================================
+% Add, remove, or renumber affiliations as needed.
+% Include the institutional affiliation where the work was conducted.
+% If an author's present address differs, provide it as a footnote or note as appropriate.
+\newcommand{\AffiliationsBlock}{%
+
+\textsuperscript{1}
+Department or Laboratory, Institution, City, State/Province, Postal Code, Country.
+
+\vspace{0.05cm}
+
+\textsuperscript{2}
+Department or Laboratory, Institution, City, State/Province, Postal Code, Country.
+
+}
+
+
+% =========================================================
+% CORRESPONDENCE
+% =========================================================
+\newcommand{\CorrespondenceBlock}{%
+Correspondence:
+Corresponding Author
+(\href{mailto:author@example.com}{author@example.com})
+}
+
+
+% =========================================================
+% EDITORIAL DATES
+% =========================================================
+\newcommand{\DatesBlock}{%
+Received: -- \;|\;
+Revised: -- \;|\;
+Accepted: --
+}
+
+% =========================================================
+% KEYWORDS
+% =========================================================
+% Journal guidance: provide up to five keywords.
+% Include at least one relevant stress topic when applicable to the manuscript.
+% Avoid unnecessary duplication of words already used in the title.
+\newcommand{\KeywordsBlock}{%
+keyword 1 \;|\;
+keyword 2 \;|\;
+keyword 3 \;|\;
+keyword 4 \;|\;
+keyword 5
+}
+
+
+% =========================================================
+% ABBREVIATIONS
+% =========================================================
+% If no abbreviations are used, remove this content from the first-page footer.
+\newcommand{\AbbreviationsBlock}{%
+ABC, abbreviation definition;
+XYZ, abbreviation definition.
+}
+
+
+% =========================================================
+% JOURNAL INFORMATION
+% =========================================================
+\newcommand{\RunningYear}{20XX}
+
+\newcommand{\VolumeInfo}{%
+Volume:ArticleNumber
+}
+
+\newcommand{\DOIInfo}{%
+https://doi.org/xx.xxxx/xxxxx
+}
+
+% =========================================================
+% ABSTRACT
+% =========================================================
+% Journal guidance: the abstract should be unstructured and should not contain abbreviations.
+% Briefly state the context or problem, objective, main methods, principal results, and conclusion.
+% Keep the text concise and focused on the study's main contribution.
+\newcommand{\AbstractText}{%
+\noindent
+Insert the abstract here.
+}
+
+
+% =========================================================
+% ABSTRACT BOX
+% =========================================================
+\newcommand{\AbstractBox}[1]{%
+
+\vspace{0.30cm}
+
+\noindent
+\colorbox{JACGray}{%
+    \parbox{\dimexpr\textwidth-2\fboxsep\relax}{%
+
+        \vspace{0.20cm}
+
+        {\large\bfseries ABSTRACT}
+
+        \vspace{0.10cm}
+
+        \justifying
+
+        #1
+
+        \vspace{0.14cm}
+
+    }%
+}
+
+}
+
+% =========================================================
+% DOCUMENT
+% =========================================================
+\begin{document}
+
+% =========================================================
+% FIRST PAGE
+% =========================================================
+\thispagestyle{empty}
+
+% =========================================================
+% JOURNAL HEADER
+% =========================================================
+\noindent
+\begin{minipage}[t]{0.45\textwidth}
+
+\vspace{0pt}
+
+\includegraphics[
+    width=0.90\linewidth,
+    keepaspectratio
+]{Journal.png}
+
+\end{minipage}
+%
+\hfill
+%
+\begin{minipage}[t]{0.27\textwidth}
+
+\vspace{-0.10cm}
+
+\raggedleft
+
+\includegraphics[
+    width=0.95\linewidth,
+    keepaspectratio
+]{wiley.png}
+
+\end{minipage}
+
+\vspace{0.52cm}
+
+% =========================================================
+% ORIGINAL ARTICLE / OPEN ACCESS
+% =========================================================
+\noindent
+
+\includegraphics[
+    width=0.40\textwidth,
+    keepaspectratio
+]{original.png}
+
+\vspace{0.48cm}
+
+% =========================================================
+% TITLE
+% =========================================================
+{\fontsize{21}{24}\selectfont
+\bfseries
+\color{JACDark}
+\ArticleTitle
+\par}
+
+\vspace{0.28cm}
+
+% =========================================================
+% AUTHORS
+% =========================================================
+{\small
+\ArticleAuthors
+\par}
+
+\vspace{0.18cm}
+
+% =========================================================
+% AFFILIATIONS
+% =========================================================
+{\footnotesize
+
+\setlength{\parindent}{0pt}
+
+\raggedright
+
+\AffiliationsBlock
+
+\par
+}
+
+\vspace{0.18cm}
+
+% =========================================================
+% CORRESPONDENCE
+% =========================================================
+{\footnotesize
+\CorrespondenceBlock
+\par
+}
+
+\vspace{0.08cm}
+
+% =========================================================
+% DATES
+% =========================================================
+{\footnotesize
+
+\textbf{Received:} -- 
+\;|\;
+\textbf{Revised:} --
+\;|\;
+\textbf{Accepted:} --
+
+\par
+}
+
+\vspace{0.08cm}
+
+% =========================================================
+% KEYWORDS
+% =========================================================
+{\footnotesize
+
+\textbf{Keywords:}
+\KeywordsBlock
+
+\par
+}
+
+% =========================================================
+% ABSTRACT
+% =========================================================
+\AbstractBox{\AbstractText}
+
+\vspace*{\fill}
+
+% =========================================================
+% FIRST-PAGE FOOTER
+% =========================================================
+{\scriptsize
+
+\hrule
+
+\vspace{0.10cm}
+
+\textbf{Abbreviations:}
+\AbbreviationsBlock
+
+\vspace{0.10cm}
+
+\hrule
+
+\vspace{0.10cm}
+
+This is an open access article under the terms of the
+Creative Commons Attribution License, which permits use,
+distribution and reproduction in any medium,
+provided the original work is properly cited.
+
+\vspace{0.08cm}
+
+© \RunningYear\ The Author(s).
+\textit{Journal of Agronomy and Crop Science}
+published by Wiley-VCH GmbH.
+
+\vspace{0.10cm}
+
+\hrule
+
+\vspace{0.10cm}
+
+\textit{Journal of Agronomy and Crop Science},
+\RunningYear;
+\VolumeInfo
+
+\href{\DOIInfo}{\DOIInfo}
+
+\hfill
+1 of \pageref{LastPage}
+
+}
+
+% =========================================================
+% PAGE 2 ONWARD — TWO COLUMNS
+% =========================================================
+\clearpage
+
+\twocolumn
+
+\pagestyle{fancy}
+
+% =========================================================
+% KEY POINTS
+% =========================================================
+% Journal guidance: provide 3 to 5 brief Key Points in bullet form.
+% Each point should summarize the initial situation/problem, approach, main result,
+% significance, or implication of the research.
+% Keep each point brief (approximately 50--100 characters) and avoid abbreviations.
+% Replace the example items below with the main take-home messages of the manuscript.
+\noindent
+\fbox{%
+\begin{minipage}{0.94\columnwidth}
+
+\vspace{0.14cm}
+
+{\normalsize\bfseries Key Points}
+
+\vspace{0.06cm}
+
+\begin{itemize}
+    \setlength{\itemsep}{0.05cm}
+    \setlength{\topsep}{0.02cm}
+    \setlength{\parsep}{0pt}
+    \setlength{\partopsep}{0pt}
+
+    \item Insert the first key point here.
+    \item Insert the second key point here.
+    \item Insert the third key point here.
+    \item Insert the fourth key point here.
+    \item Insert the fifth key point here.
+
+\end{itemize}
+
+\vspace{0.04cm}
+
+\end{minipage}%
+}
+
+\vspace{0.22cm}
+
+% =========================================================
+% 1 INTRODUCTION
+% =========================================================
+\section{Introduction}
+\label{sec:introduction}
+
+% Suggested content:
+% - Introduce the broader scientific context and the relevance of the topic.
+% - Define the specific problem or knowledge gap addressed by the study.
+% - Summarize the most relevant literature needed to justify the research.
+% - Explain why the study is needed and what is novel about the approach.
+% - End the section with a clear objective and, when appropriate, the hypothesis.
+% Use \citet{key} for narrative citations and \citep{key} for parenthetical citations.
+
+
+% =========================================================
+% 2 MATERIALS AND METHODS
+% =========================================================
+\section{Materials and Methods}
+\label{sec:methods}
+
+% Adapt the subsection titles below to the manuscript.
+% Provide enough methodological detail for the study to be understood and reproduced.
+% Describe materials, experimental or study design, data collection, and analytical procedures.
+% Include ethical approvals, permits, or reporting standards here when applicable.
+
+\subsection{Study Material or Experimental Material}
+\label{subsec:material}
+
+% Describe the biological material, germplasm, study population, experimental units,
+% locations, growing seasons, or other materials relevant to the study.
+
+\subsection{Experimental Design or Study Design}
+\label{subsec:design}
+
+% Describe the experimental layout or study design, treatments, replication, randomization,
+% management practices, and other design features needed to interpret the study.
+
+\subsection{Data Collection}
+\label{subsec:data}
+
+% Describe the traits, variables, measurements, sampling procedures, instruments,
+% environmental data, laboratory procedures, or other data sources used in the study.
+
+\subsection{Statistical Analysis}
+\label{subsec:statistics}
+
+% Describe all statistical models, software, packages, significance criteria,
+% validation procedures, and any data transformations or quality-control steps.
+% Provide software versions and citations when appropriate.
+
+
+% =========================================================
+% FIGURE — TWO COLUMNS
+% =========================================================
+% Example:
+% \begin{figure*}[t]
+% \centering
+% \includegraphics[width=0.96\textwidth]{figure1.png}
+% \caption{Insert figure caption here.}
+% \label{fig:figure1}
+% \end{figure*}
+
+% =========================================================
+% FIGURE — ONE COLUMN
+% =========================================================
+% Example:
+% \begin{figure}[t]
+% \centering
+% \includegraphics[width=\linewidth]{figure2.png}
+% \caption{Insert figure caption here.}
+% \label{fig:figure2}
+% \end{figure}
+
+% =========================================================
+% TABLE — TWO COLUMNS
+% =========================================================
+% Example:
+% \begin{table*}[t]
+% \centering
+% \caption{Insert table caption here.}
+% \label{tab:table1}
+% \begin{tabular}{llll}
+% \toprule
+% Column 1 & Column 2 & Column 3 & Column 4 \\
+% \midrule
+% -- & -- & -- & -- \\
+% \bottomrule
+% \end{tabular}
+% \end{table*}
+
+
+% =========================================================
+% 3 RESULTS
+% =========================================================
+\section{Results}
+\label{sec:results}
+
+% Present the main findings in a clear and logical order.
+% Report results objectively and support them with the relevant tables and figures.
+% Avoid extensive interpretation here; reserve broader interpretation for the Discussion.
+% Add or remove subsections as needed.
+
+\subsection{First Results Subsection}
+% Add text here.
+
+\subsection{Second Results Subsection}
+% Add text here.
+
+
+% =========================================================
+% 4 DISCUSSION
+% =========================================================
+\section{Discussion}
+\label{sec:discussion}
+
+% Suggested content:
+% - Interpret the main findings in relation to the study objective or hypothesis.
+% - Compare the results with relevant previous studies.
+% - Explain biological, agronomic, methodological, or practical implications.
+% - Discuss important limitations without overstating the conclusions.
+% - Identify relevant directions for future research when appropriate.
+
+
+% =========================================================
+% 5 CONCLUSION
+% =========================================================
+\section{Conclusion}
+\label{sec:conclusion}
+
+% Summarize the principal conclusions supported by the results.
+% State the main contribution and practical or scientific implications of the study.
+% Avoid introducing new results, citations, or unsupported generalizations.
+
+% =========================================================
+% AUTHOR CONTRIBUTIONS
+% =========================================================
+\section*{Author Contributions}
+
+% The journal requires author contributions to follow the CRediT taxonomy.
+% List each author's initials or name followed by the relevant contribution roles.
+% Example: A.A.: Conceptualization, Methodology, Writing -- original draft.
+% B.B.: Data curation, Formal analysis, Writing -- review and editing.
+
+
+% =========================================================
+% ACKNOWLEDGEMENTS
+% =========================================================
+\section*{Acknowledgements}
+
+% Acknowledge individuals or organizations that contributed to the work but do not meet authorship criteria.
+% The journal also asks authors to list funding sources accurately; funding may be stated here
+% and/or in the dedicated Funding section below, depending on the final submission format.
+
+
+% =========================================================
+% FUNDING
+% =========================================================
+\section*{Funding}
+
+% List all funding sources and grant numbers accurately.
+% Use the official funder name whenever possible.
+% If no specific funding was received, include an appropriate no-funding statement.
+
+
+% =========================================================
+% CONFLICT OF INTEREST
+% =========================================================
+\section*{Conflict of Interest}
+
+% Disclose any financial or non-financial interests that could be perceived as influencing the work.
+% If there are no conflicts of interest, include an explicit declaration.
+
+
+% =========================================================
+% DATA AVAILABILITY
+% =========================================================
+\section*{Data Availability Statement}
+
+% The journal expects a Data Availability Statement.
+% State where the data supporting the findings can be accessed, including repository name, DOI,
+% accession number, or URL when available. If data are restricted, explain the reason and access conditions.
+
+
+% =========================================================
+% SUPPLEMENTARY INFORMATION
+% =========================================================
+%\section*{Supplementary Information}
+
+% Describe any supplementary files provided with the manuscript.
+% Supporting information should be supplied as separate files at submission.
+
+
+
+
+% =========================================================
+% REFERENCES
+% =========================================================
+\section*{References}
+% Keep the reference list consistent. The journal uses APA style, but Free Format submission
+% allows references to be submitted in another consistent style at initial submission.
+\printbibliography[heading=none]
+
+
+% =========================================================
+% END DOCUMENT
+% =========================================================
+\end{document}
