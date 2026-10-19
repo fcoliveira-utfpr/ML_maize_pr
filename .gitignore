@@ -1,0 +1,16 @@
+.venv/
+.venv313/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.DS_Store
+.claude
+.claude/settings.local.json
+bibliografia/
+*.joblib
+
+# clima diário BR-DWGD (72 MB): regerado pelo notebooks/01_clima_xavier.ipynb
+dados/xavier_diario_pr.csv.gz
+dados/xavier_diario_pr.parquet
+Artigo_milho/
+Wiley_LaTeX_Manuscript_Template_for_the_Journal_of_Agronomy_and_Crop_Science/
