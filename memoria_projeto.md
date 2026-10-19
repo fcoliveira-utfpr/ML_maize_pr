@@ -22,9 +22,10 @@ Substitui e aprofunda dois TCCs orientados pelo autor (UTFPR Santa Helena, 2026)
 | `notebooks/01_clima_xavier.ipynb` | Clima diário 1998-12-01 a 2025-12-31 (BR-DWGD v3.2.4) para as sedes dos 399 municípios, via Earth Engine |
 | `notebooks/02_simulacao_mza.ipynb` | MZA-FAO + critérios ZARC: 399 municípios × 27 anos (1999–2025) × 9 datas de semeadura ≈ 97 mil simulações |
 | `notebooks/modelo_mza.py` | Simulação de um ciclo (fenologia por graus-dia, Kc, ky, raiz, ZARC), usando `agrometeorologiapy` |
-| `notebooks/03_modelo_hibrido.ipynb` | (a fazer) ML híbrido treinado no IBGE/PAM, validação por ano, quantis, análises por fase |
+| `notebooks/03_modelo_hibrido.ipynb` | ML híbrido (modelo final L = E monotônico + SVR), validação por ano, comparação de geradores, conformal, análises por fase, SHAP, predição por data |
 | `notebooks/04_economia.ipynb` | Custos e preços reais (R$ de dez/2025) |
-| `notebooks/05_risco_decisao.ipynb` | (a fazer) Margem por ano, SERF, P(prejuízo), CVaR, seguro/ZARC, melhor data |
+| `notebooks/05_risco_decisao.ipynb` | Margem por ano, SERF, P(prejuízo), CVaR, seguro/ZARC oficial, melhor data, sensibilidades econômicas, Brier |
+| `notebooks/06_sensibilidade.ipynb` | Compara os cenários de `notebooks/sensibilidade.py` (CT ± 100, pesos da janela) com a rodada base |
 | `dados/` | Insumos brutos (ver tabela abaixo) |
 | `resultados/` | Saídas dos notebooks (CSV/parquet) |
 | `figuras/` | Figuras do artigo (300 dpi) |
@@ -458,6 +459,15 @@ PPf, PA, EC, ciclo, ISNA/DEF/EXC/geada/calor/Tmin por fase; APSIM 12; AquaCrop 1
   o ganho final vem do desenho de variáveis guiado pela agronomia + física no ML (monotonia) + ensemble.
 - Script: scratchpad da sessão (`selecao_auto.py`).
 
+## Inglês e figuras (19/10/2026)
+
+- Decisão do autor: **todo o repositório em inglês** (markdown, comentários, docstrings, mensagens e
+  textos das figuras); **nomes de variáveis/colunas ficam em português**. Rótulos das figuras via
+  dicionários (ROTULO, FASE_EN, VAR_EN, NOME_EN). Fonte das figuras: `plt.rcParams["font.size"] = 16`.
+- Notebooks 01, 02b, 02c, 02d só tiveram o texto traduzido (não reexecutados: Earth Engine e horas de
+  simulação); as saídas antigas deles seguem em português. 01b, 02, 03, 04, 05, 06 reexecutados.
+- Itens de planilha (DERAL/CONAB) e "Paraná" ficam como na fonte.
+
 ## Próximos passos
 
 1. Restrição da colheita da soja (05/01 só com soja superprecoce): **vai para a discussão do artigo**
@@ -466,4 +476,12 @@ PPf, PA, EC, ciclo, ISNA/DEF/EXC/geada/calor/Tmin por fase; APSIM 12; AquaCrop 1
 3. ~~Sensibilidades~~ → feitas. CT: **mantido 1450 no principal** (literatura); 1550 vai como sensibilidade
    (indício de soma térmica curta para híbridos atuais). Autor dispensou o teste de 1650 (19/10/2026).
 4. Opcional (computacional): calibrar a profundidade de raiz/CAD da réplica para reproduzir o ZARC oficial.
-5. Escrita em inglês no modelo LaTeX da revista.
+5. Quebra de 2022 (cigarrinha/enfezamento): **só como suposição na discussão**, sem busca na literatura
+   (decisão do autor, 19/10/2026).
+6. ~~Reenquadrar o achado central~~ → **aprovado pelo autor** (19/10/2026): "o modelo mais simples, sem
+   calibração, é tão informativo quanto APSIM/DSSAT; o ganho vem das variáveis desenhadas com agronomia,
+   da física no ML e do ensemble". Seção 2.2 do notebook 03 (seleção automática igual para os 4 geradores).
+7. ~~README e limpeza~~ → README reescrito em inglês (19/10/2026). Não havia arquivos antigos: o commit do
+   autor já continha só o pipeline atual. Avisado: `Artigo_milho/` e o modelo LaTeX estão no .gitignore
+   mas foram commitados (públicos) — `git rm -r --cached` fica a critério do autor.
+8. **Próximo: escrita em inglês no modelo LaTeX da revista.**
