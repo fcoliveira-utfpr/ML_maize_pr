@@ -90,8 +90,7 @@ gridded data (1961–2020). *International Journal of Climatology*, 42(16), 8390
 
 ```bash
 python3.13 -m venv .venv313
-.venv313/bin/pip install agrometeorologiapy==0.3.0 pandas numpy scipy matplotlib scikit-learn \
-    shap mapie earthengine-api pyarrow xlrd openpyxl nbconvert ipykernel
+.venv313/bin/pip install -r requirements.txt
 .venv313/bin/python -m ipykernel install --user --name milho_pr
 
 cd notebooks

@@ -129,6 +129,28 @@ Substitui e aprofunda dois TCCs orientados pelo autor (UTFPR Santa Helena, 2026)
 - Preço mensal deflacionado mês a mês; **jul/2023 = R$ 215/saca no Ipeadata é erro de digitação**:
   valores > 2× a mediana dos vizinhos são substituídos pela média dos meses adjacentes.
 
+### Premissas do notebook 05 e fontes (levantadas em 18/10/2026)
+- **Funrural 1,5%** da receita bruta (1,2% previdência + 0,1% RAT + 0,2% SENAR), produtor pessoa física:
+  Lei 8.212/1991, art. 25, redação da Lei 13.606/2018. Antes de 2018 eram 2,3%; o produtor pode optar
+  pela folha de salários.
+- **Cobertura do seguro 65%** da produtividade esperada: faixa mínima subvencionada pelo PSR (60–65%,
+  desde 2016) e nível de ~94% das apólices de milho 2ª safra em 2019 (imprensa citando o MAPA; a CNA
+  propôs subir o mínimo para 65%). Produtividade esperada = histórico do produtor ou média do IBGE
+  (condições gerais do seguro, MAPA). **Confirmado nos dados do PSR** (abaixo): 75% das apólices em 65%.
+- **Dados do PSR/SISSER** (dados abertos do MAPA, dataset `sisser3`, CSV 2016–2024 + 2025; baixar com
+  user-agent de navegador, senão o servidor devolve arquivo vazio). Os brutos têm nome e documento
+  parcial dos segurados: ficam fora do repositório; só entram agregados sem dado pessoal
+  (`dados/psr_milho2safra_pr_resumo_anual.csv`, `dados/psr_milho2safra_pr_cobertura.csv`).
+  Milho 2ª safra PR: 132.673 apólices; cobertura 65% (75%) e 70% (19%); taxa de prêmio média 12,8% do
+  valor garantido; subvenção federal 35–45% do prêmio → prêmio pago ≈ R$ 250/ha, igual ao item
+  PROAGRO/SEGURO da DERAL (R$ 247/ha). 2021: 67,5% das apólices indenizadas. Eventos: seca 23,9 mil,
+  geada 7,4 mil. 2025 ainda sem indenizações processadas. Usado no notebook 05 como validação
+  independente (fração indenizada × quebras < 65% previstas pelo modelo, por ano).
+- **Seguro/PROAGRO só dentro do ZARC**: PSR e PROAGRO exigem plantio conforme o zoneamento (MCR, cap. 16).
+- **20 dias da maturação fisiológica à venda**: grão com ~30–35% de umidade na camada preta, colhido
+  com 18–22% (Embrapa Milho e Sorgo); secagem no campo de 0,4–0,8 p.p./dia (Iowa State; Purdue) →
+  15–25 dias. Rodar sensibilidade com 10 e 30 dias.
+
 ### Risco e decisão (05) — desenho acordado
 - Margem como distribuição (26 anos pareados) + Monte Carlo da incerteza do ML.
 - Ranqueamento por **SERF** (Hardaker et al., 2004) numa faixa de aversão a risco; P(prejuízo); CVaR 10%.
@@ -139,35 +161,247 @@ Substitui e aprofunda dois TCCs orientados pelo autor (UTFPR Santa Helena, 2026)
 
 ## Ambiente
 
-- `.venv313` (Python 3.13) e kernel Jupyter `milho_pr`. O `.venv` antigo (Python 3.9) está quebrado
-  (o `pip` aponta para um interpretador inexistente) e pode ser apagado.
+- `.venv313` (Python 3.13, dentro do repositório) e kernel Jupyter `milho_pr`; `pip install -r requirements.txt`.
 - LightGBM e XGBoost não carregam no Mac (falta `libomp` do sistema): usar os modelos de árvore do
   scikit-learn (ExtraTrees, RandomForest, HistGradientBoosting).
 - Earth Engine: projeto Cloud **`mapbiomas-brazil`** (credenciais em `~/.config/earthengine`).
-- O repositório do artigo é a pasta `ML_maize_pr/` (criada pelo autor em 18/10/2026 dentro de
-  `~/Python/ML_milho_oeste/`). O `.venv313` ficou na pasta de cima
-  (`~/Python/ML_milho_oeste/.venv313`); o kernel `milho_pr` aponta para ele com caminho absoluto.
+- O repositório do artigo é `~/Python/ML_maize_pr` (clone de github.com/fcoliveira-utfpr/ML_maize_pr).
+  O ambiente `.venv313` fica dentro dele (fora do git); o kernel `milho_pr` aponta para ele.
+  Pacotes exatos em `requirements.txt`. A pasta antiga `~/Python/ML_milho_oeste` (clone do `aquacrop_ml`)
+  não é mais usada.
   **Não mover a pasta com notebook rodando**: a simulação MZA de 18/10 se perdeu porque a pasta foi
   movida durante a execução e a saída foi gravada num caminho que deixou de existir.
-- Rodar um notebook: `cd notebooks && ~/Python/ML_milho_oeste/.venv313/bin/python -m nbconvert --to notebook --execute --inplace --ExecutePreprocessor.kernel_name=milho_pr <nb>.ipynb`
+- **Rodadas longas: usar `caffeinate -i -s`** (o Mac dormiu de ~02h a ~04h45 em 19/10 e parou APSIM e
+  DSSAT sem erro). O DSSAT roda em `~/.dssat_tmp` (caminhos ≤ 80 caracteres); o APSIM em pastas temporárias.
+- Rodar um notebook: `cd notebooks && ../.venv313/bin/python -m nbconvert --to notebook --execute --inplace --ExecutePreprocessor.kernel_name=milho_pr <nb>.ipynb`
 - Ambiente Windows antigo do autor (dois Pythons 3.13, Anaconda × sistema) não se aplica mais a este pipeline.
 
 ## Fluxo git + Colab
 
 O artigo vai para um **repositório novo, `ML_maize_pr`**, a ser criado pelo autor. O `aquacrop_ml`
 (remoto atual desta pasta, `origin`) guarda o histórico dos TCCs e **não deve ser renomeado**.
-O README já usa o contador de visitas do `ML_maize_pr`. A pasta local continua `ML_milho_oeste`.
+O README já usa o contador de visitas do `ML_maize_pr`.
 
 O autor também edita pelo Google Colab, que commita direto no GitHub. Antes de commitar: `git fetch`
 e `git status`; resolver com `git pull origin main --no-rebase`. Identidade do git local ao
 repositório (confirmar com o autor antes de alterar). Push grande por HTTPS: `http.postBuffer`
 já configurado. Nada é commitado sem pedido do autor.
 
+## Resultados da primeira rodada completa (19/10/2026)
+
+### MZA (02)
+- 96.957 simulações (399 × 27 × 9), nenhum ciclo incompleto com janela de 300 dias. A 1ª rodada falhou
+  porque a janela era de 220 dias (planalto frio não fechava 1450 °C dia) e o `nbconvert` saiu com
+  código 0 escondendo o erro: rodar sempre com `set -o pipefail`.
+- Semeadura tardia: ciclo 105 → 158 dias (05/01 → 25/03), geada no enchimento 0,04 → 1,15 dia, PA
+  2.933 → ~1.750 kg/ha.
+
+### Modelo híbrido (03) — validação deixando um ano de fora, 7.437 município-anos, 373 municípios
+| Modelo | RMSE kg/ha | R² anual estadual |
+|---|---|---|
+| A média histórica | 1.183 | 0,35 |
+| B MZA calibrado (linear: ISNA floração/enchimento + severidade da geada) | 1.140 | 0,53 |
+| C ML puro (HGB raso, clima bruto, 11 vars) | 1.140 | 0,54 |
+| D híbrido (HGB raso, variáveis do MZA, 10 vars) | **1.086** | **0,64** |
+| E híbrido monotônico (física) — **modelo final** | 1.099 | 0,60 |
+- **Lição**: ExtraTrees com ~70 variáveis decorava os anos (não superava B). O sinal climático é anual e
+  regional (22 anos de treino): o modelo tem de ser raso e parcimonioso. Mesma complexidade, variáveis
+  do MZA > clima bruto → é o argumento do híbrido. E escolhido pela coerência física ao prever cada data
+  e por captar melhor a quebra de 2021 (todos subestimam 2021: obs. 3.069, E prevê ~3.840).
+- Intervalo P10–P90 conformal: cobertura 79,4% (nominal 80%); fraca em 2020–2022 (0,44–0,64).
+- SHAP: estático (altitude, DTA) ~39%, enchimento ~29%, floração ~21%; variável top: ISNA no enchimento.
+
+### Risco e decisão (05)
+- **ZARC oficial no lugar da réplica**: tábua de risco 2026/2027 (dados abertos MAPA,
+  `dados/zarc_milho2safra_pr_2026_2027.csv`), Grupo I (Cod_Ciclo 20), classe AD do solo pela DTA
+  (DTA mm/m ÷ 100 = mm/cm; limites IN SPA/MAPA 1/2022 → AD2 19, AD3 51, AD4 48, AD5 247, AD6 34 municípios).
+  A réplica do critério hídrico (CAD = 0,40 m × DTA) concorda só 40% com o oficial — pessimista demais
+  (classificava Norte/Oeste como inaptos). Fica como teste no notebook, não como critério.
+  Códigos da tábua: Cod_Ciclo 20 = Grupo I, 21 = Grupo II; Cod_Solo 11–16 = AD1–AD6; dec1 = 1–10/jan.
+  A janela do milho 2ª safra no PR termina em dec8 (25/03 inapto em todo o estado).
+- **Risco da lavoura**: o rendimento municipal varia menos que a lavoura; τ (desvio idiossincrático em
+  log) calibrado no PSR 2016–2024 = **0,33** (σ médio do município 0,26); r anual com a fração de apólices
+  indenizadas = 0,86. Sem isso o seguro saía com valor negativo; com isso, +R$ 47 a +R$ 94/ha (maior no Oeste).
+- Melhor data (CE, rr = 2, só datas aptas): 05/01 em 314 municípios — a data mais cedo da grade;
+  faixa de fronteira do Oeste prefere 15/03. 27 municípios sem data apta (planalto sul).
+  Sensibilidades: cobertura 70% (99% mesma data), ZARC Grupo II (94%), 10/30 dias até a venda (88–90%).
+- Brier da P(prejuízo) fora da amostra: todos ~0,165–0,171 contra 0,247 da referência; diferenças
+  pequenas entre modelos (o prejuízo depende muito do nível do município, de preço e de custo).
+
+## Segunda rodada (19/10/2026): solo, limite do R² e APSIM
+
+### Solo (notebook 01b)
+- **DTA do balanço hídrico** = média da AWC (asset do autor `projects/fcoliveira/assets/AWC_br`, polígonos
+  do mapa de solos, m³ m⁻³ × 1000 = mm m⁻¹) sobre a **lavoura temporária** (MapBiomas Coleção 10, 2024,
+  classes 39 e 41) de cada município. Correlação 0,95 com a DTA antiga da sede (`dta_ponto_mm_m`).
+- **Granulometria por camada** (perfil do APSIM): **MapBiomas Solo Coleção 3** (argila/areia em 10 camadas
+  de 10 cm, 0–100 cm, a partir do SoilData), por sugestão do autor no lugar do SoilGrids (global).
+  `dados/solo_camadas_pr.csv`. Earth Engine: inicializar com `project="mapbiomas-brazil"` (ou `fcoliveira`).
+
+### Por que o R² municipal é ~0,40 (diagnóstico)
+- Decomposição do log-rendimento IBGE (dentro da amostra): tendência + município 0,35; + efeito de ano
+  estadual 0,57; + efeito ano × 12 regiões **0,69** = teto mesmo com clima perfeito. 71% dos valores do
+  IBGE são múltiplos de 100 kg e 8,5% repetem o ano anterior (estimativas, não levantamento).
+- Testes (validação por ano): sem valores repetidos 0,404; + latitude/longitude **0,410** (R² anual 0,66);
+  hiperparâmetros 0,40–0,41; janela pelas datas aptas do ZARC 0,36 (pior); tendência por município 0,40;
+  peso pela área 0,37; só municípios ≥ 1000 ha 0,30. → adotados: tirar repetidos + lat/lon.
+- Choques não climáticos: 2022 superestimado por todos os modelos — hipótese: cigarrinha/enfezamento
+  na safrinha 2021/22 (confirmar na literatura).
+
+### APSIM NG sem calibração (notebook 02b, `notebooks/modelo_apsim.py`)
+- Ideia do autor: APSIM sem calibrar + ML corrigindo (cf. Shahhosseini et al., 2021, Sci. Rep.).
+- .NET 8 SDK instalado em `~/.dotnet` (sem sudo); ApsimX clonado e compilado em `~/Python/apsimx`
+  (`dotnet ~/Python/apsimx/bin/Models.dll arquivo.apsimx --cpu-count=4`).
+- Base: `Examples/Maize.apsimx`; cultivar genérica `A_100`; 6 pl m⁻²; 200 kg N ha⁻¹ (N não limitante);
+  perfil de 7 camadas (0–1,8 m) com LL15/DUL/SAT por Saxton & Rawls (2006) a partir da granulometria,
+  água disponível escalada para a AWC do município; MO por camada suposta (2,5% → 0,5%).
+- **Bug corrigido**: a regra "Sow using a variable rule" exige chuva acumulada > MinRain (estrito); com
+  MinRain = 0 só semeava se chovesse no dia → MinESW = MinRain = −1.
+- Variáveis por ciclo: rendimento e biomassa simulados, nº de grãos, IAF máx., dias à floração, ciclo,
+  **estresse hídrico acumulado** Σ(1 − Fw) por período (veg/flor/ench; a média do Fw dilui o sinal) e
+  Tmin mínima por período. Estádios do Maize NG: 7 = florescimento, 8–10 = enchimento → maturidade.
+- Piloto Cascavel: 9 datas × 27 anos em 19,5 s; rendimento simulado 8–10 t/ha (jan) → 1–5 t/ha (25/03).
+- Notebook 03: modelos F (híbrido APSIM) e G (MZA + APSIM), com restrições monotônicas; o final é o de
+  menor RMSE entre E, F e G.
+
+## Hipótese ampliada (19/10/2026): qual modelo de processos rende o melhor híbrido?
+
+Decisão do autor: comparar **MZA-FAO, AquaCrop, APSIM e DSSAT**, todos **sem calibração** (parâmetros
+de fábrica; calibrar contra o rendimento só no ML), como geradores de variáveis do mesmo ML (HGB raso,
+monotônico, validação deixando um ano de fora). O vencedor segue para o risco/decisão (notebook 05).
+Os notebooks de exemplo de soja do autor (APSIM/AquaCrop/DSSAT, Santa Helena) serviram de base e foram
+apagados por ele; trechos salvos no scratchpad da sessão.
+
+- **Comparação justa**: mesma janela para todos os modelos (4 datas: 15/01, 05/02, 25/02, 15/03),
+  municípios com histórico de 2ª safra no IBGE. Só o vencedor precisa das 9 datas × 399 municípios
+  (MZA e APSIM já têm; AquaCrop/DSSAT seriam completados se vencerem).
+- **AquaCrop** (`aquacrop`, AquaCrop-OSPy; `notebooks/modelo_aquacrop.py`): cultura `MaizeGDD`,
+  ETo do BR-DWGD, mesmo perfil de solo do APSIM. Variáveis: rendimento e potencial simulados, razão,
+  biomassa, Σ(1 − Tr/TrPot) por período (veg < HIstart ≤ flor < HIstart + Flowering ≤ ench), Tmin.
+  Sem calibração ele zera o rendimento em ~8/27 anos em Cascavel (estresse de frio na polinização,
+  parâmetro de milho de verão temperado) — resultado do estudo, não falha da comparação.
+  ~20–25 s por município × data.
+- **DSSAT** (`DSSATTools` v3; `notebooks/modelo_dssat.py`): CERES-Maize, cultivar genérica `990003`
+  SHORT SEASON, modo sazonal 27 safras, 200 kg N, cultura anterior soja. O binário do pacote é Linux:
+  compilar `DSSAT/dssat-csm-os` no Mac (gfortran via `brew install gcc` + cmake) em
+  `~/Python/dssat-csm-os/build/bin/dscsm048` e apontar `DSSATTools.run.BIN_PATH`. Estresse = Σ WSPD
+  por período (±10 dias da antese).
+- `notebooks/rodar_lote.py`: execução paralela com checkpoint por município (AquaCrop e DSSAT).
+
+## Resultado da comparação dos geradores de variáveis (19/10/2026, 06h50)
+
+Validação deixando um ano de fora, 6.806 município-anos (sem valores repetidos), 373 municípios,
+janela de 4 datas, mesmo ML (HGB raso; E, F, H, I com restrições monotônicas):
+
+| Modelo | RMSE kg/ha | R² | R² anual | Δ RMSE vs E (IC 95%, bootstrap por anos) |
+|---|---|---|---|---|
+| A média histórica | 1.207 | 0,26 | 0,31 | +108 (−57; 285) |
+| B MZA calibrado (linear) | 1.128 | 0,35 | 0,59 | +37 (−36; 103) |
+| C ML puro (clima bruto) | 1.158 | 0,32 | 0,55 | +65 (−23; 153) |
+| D MZA híbrido (sem restrição) | **1.084** | **0,40** | **0,66** | −7 (−44; 27) |
+| **E MZA híbrido monotônico — final** | 1.092 | 0,39 | 0,63 | — |
+| F APSIM híbrido | 1.145 | 0,33 | 0,51 | +51 (−1; 110), P(melhor que E) = 3% |
+| H AquaCrop híbrido | 1.218 | 0,25 | 0,42 | +123 (0,1; 254) — pior que a média histórica |
+| I DSSAT híbrido | 1.144 | 0,33 | 0,52 | +52 (11; 94) |
+| J todos os modelos | 1.130 | 0,35 | 0,56 | +39 (10; 65) |
+
+- **Achado central: o modelo mais simples (MZA-FAO) é o melhor gerador de variáveis.** Os modelos
+  complexos sem calibração (APSIM, DSSAT) ficam no nível do MZA linear; o AquaCrop de fábrica piora
+  a previsão (zera ~50% das combinações: cultura `MaizeGDD` de verão temperado na safrinha). Juntar
+  tudo (J) piora: mais variáveis com 22 anos de treino = sobreajuste.
+- **Ressalva para o artigo**: as variáveis do MZA foram escolhidas depois de testes exploratórios nos
+  mesmos dados (risco de viés de seleção a favor do MZA); as do APSIM/AquaCrop/DSSAT foram definidas uma
+  vez, sem ajuste. Considerar uma seleção de variáveis automática e igual para todos (ex.: dentro da
+  validação) como teste de robustez.
+- Brier da P(prejuízo) fora da amostra: D 0,165 (melhor), B 0,170, E 0,171, A 0,173, F 0,174,
+  H 0,180 — mesma ordem.
+- Simulações: APSIM 399 × 27 × 9 (96.957, todas maturaram); DSSAT e AquaCrop 373 × 27 × 4 (40.284 cada).
+  DSSAT: ciclo 85–115 d, rendimento ~5 t/ha pouco sensível à data; APSIM: 7,7 → 3,3 t/ha de 05/01 a 25/03.
+- O vencedor (E, MZA) já tem 9 datas × 399 municípios → o notebook 05 rodou com ele; resultados de
+  decisão iguais em essência à rodada anterior (melhor data 05/01 em 327 municípios; 15/03 em 28 da
+  fronteira Oeste; seguro/ZARC +R$ 54 a +R$ 107/ha; τ = 0,33, r com PSR = 0,84).
+
+## Teste: zonas agroclimáticas GYGA no treinamento (19/10/2026)
+
+Ideia do autor: treinar por zonas (artigo "Hydroclimatic and Thermal Characterization of Agroclimatic
+Zones in Paraná", repo github.com/fcoliveira-utfpr/climate_parana; zona predominante por município na
+Tabela S1). 9 zonas com dados de 2ª safra (7701: 2.017 obs; 6801: 1.588; 7601: 1.528; 7801: 944;
+5901/6601/6701 quase sem dados). Mesma validação deixando um ano de fora, modelo E:
+
+| Variante | RMSE kg/ha | Δ vs E (IC 95%, bootstrap por anos) |
+|---|---|---|
+| E global | 1.092 | — |
+| E + zona como variável | 1.092 | +0 (−2; +2) |
+| E com um modelo por zona (≥ 300 obs) | 1.098 | +6 (−14; +27) |
+| E com tendência tecnológica por zona | 1.089 | −4 (−22; +16) |
+| E tendência por zona + zona como variável | 1.090 | −2 (−21; +17) |
+
+- **Zonas não melhoram o desempenho.** O efeito fixo do município já absorve o nível da zona; latitude,
+  longitude, altitude e DTA já entram no ML; e as variáveis do MZA já trazem o clima da zona. Um modelo
+  por zona divide os dados, mas o gargalo são os 22 anos de treino, não a heterogeneidade espacial.
+- **Decisão do autor: zonas descartadas** (não entram no artigo).
+
+## Tentativas de subir o R² (19/10/2026, 3ª rodada) — validação por ano, Δ RMSE vs E
+
+| Variante | R² | R² anual | Δ RMSE (IC 95%) | P(melhor que E) |
+|---|---|---|---|---|
+| E (atual) | 0,394 | 0,634 | — | — |
+| + anomalia do ano anterior (lag1) / média de 3 anos | 0,390 / 0,393 | 0,62 | +3 / +1 | 32% / 44% |
+| + variáveis da data cedo (15/01) e tarde (15/03) | 0,398 | 0,655 | −4 (−18; +10) | 71% |
+| + Rs, Tmax, excedente, UR por fase | 0,382 | 0,603 | +11 | 19% |
+| ensemble D + E (média em log) | **0,406** | 0,650 | −11 (−29; +5) | 91% |
+| ensemble B + D + E | 0,409 | 0,641 | −13 (−46; +15) | 82% |
+
+- **Onde está o erro**: 73% do erro² é dentro do ano, entre municípios (ruído do IBGE + manejo local);
+  acertar a média estadual de cada ano levaria o R² só a 0,56. Sem 2021–2022, R² = 0,42–0,44.
+- **R² por escala** (modelo E / ensemble D+E): município 0,39/0,41; microrregião-ano 0,51/0,53;
+  mesorregião-ano 0,58/0,60; estado-ano 0,63/0,65 → reportar o desempenho nas várias escalas.
+- Conclusão: com o IBGE municipal não há ganho grande honesto; o R² de 0,77 dos TCCs era vazamento.
+
+## Comparação de algoritmos (19/10/2026) — mesmas variáveis do híbrido (VARS_D), validação por ano
+
+Ajuste aninhado = grade avaliada por 5 blocos de anos dentro do treino de cada dobra externa.
+xgboost 3.4.1 e lightgbm 4.7.0 instalados no `.venv313` (exigiu `brew install libomp`).
+
+| Algoritmo | R² mun. | R² anual | Δ RMSE vs E (IC 95%) |
+|---|---|---|---|
+| SVR RBF aninhado (escolheu C = 0,3, γ = 0,05 em 22/23 dobras) | **0,436** | **0,718** | −38 (−91; +6) |
+| SVR RBF fixo (C = 0,3, γ = scale) | 0,415 | 0,708 | −20 |
+| HGB / LGBM monotônicos aninhados | 0,405 / 0,403 | 0,63 / 0,62 | −11 / −9 |
+| HGB D raso | 0,403 | 0,656 | −7 |
+| LGBM / XGB rasos monotônicos | 0,398 / 0,395 | 0,63 | −4 / −1 |
+| **E (HGB raso monotônico)** | 0,394 | 0,634 | — |
+| RF raso / ET raso / Ridge splines | 0,394 / 0,390 / 0,390 | 0,57–0,65 | ~0 |
+| HGB / RF / LGBM / MLP / ET padrão | 0,366–0,377 | 0,57–0,67 | +15 a +23 |
+| XGB padrão | 0,294 | 0,669 | +86 |
+
+**Ensemble SVR aninhado + E** (média em log): R² 0,435 (micro 0,550; meso 0,621; estado 0,688),
+Δ RMSE −37 (−63; −16), P(melhor) = 100% — único ganho com IC fora do zero e menor variância.
+- Hiperparâmetros quase não importam; configurações padrão (como nos TCCs) decoram os anos.
+- O SVR não tem restrição monotônica: conferir a resposta à data de semeadura antes de adotar.
+- Scripts: scratchpad da sessão (`teste_algoritmos.py`, `teste_r2.py`).
+
+## Modelo final = ensemble E + SVR (19/10/2026, decisão do autor: "a melhor opção")
+
+- Notebook 03: **K** = SVR RBF (C = 0,3, γ = 0,05, ε = 0,05; escolha do ajuste aninhado) sobre as variáveis
+  de D **sem EC e sem DEF_floracao**; **L = média (log) de E e K = modelo final**.
+- Por que tirar EC e DEF do SVR: r = 0,97 e −0,92 com ISNA_floracao; com elas o SVR repartia o efeito da
+  água com sinais opostos e EC ficava com efeito contrário ao físico (dependência parcial, seção 5.1).
+  Sem elas: R² 0,436 → 0,427, mas todas as variáveis no sentido físico (ISNA_enchimento com leve
+  não monotonicidade no topo, efeito total positivo).
+- Resultado (validação por ano): **L R² 0,427, R² anual 0,674, RMSE 1.062; Δ RMSE vs E −30 (−52; −9),
+  P = 100%**; K sozinho 0,420. Cobertura P10–P90 79,4%. Brier P(prejuízo): K 0,164, L 0,165, D 0,165, E 0,171.
+- SHAP do ensemble = média do TreeSHAP do HGB e do SHAP por permutação do SVR (o SVR prevê só ~1.400
+  linhas/s; o PermutationExplainer padrão travou o notebook por 90 min). Grupo "reprodutivo" criado para
+  geada/frio_reprod (antes caíam em "estático/ciclo").
+- Decisão (05) com L: melhor data 05/01 em 311 municípios, 15/01 em 31, 15/03 em 27 (fronteira Oeste);
+  data ótima igual à de E em 86%; τ = 0,33, r com PSR = 0,88; valor do seguro/ZARC +R$ 39 a +R$ 75/ha.
+
 ## Próximos passos
 
-1. Terminar a simulação MZA (02) e conferir: ciclo por data, PA × IBGE por ano.
-2. Notebook 03: comparar MZA calibrado, ML puro e híbrido (resíduo do MZA + solo, altitude, geada);
-   validação por ano e município+ano; quantis/conformal; SHAP por fase; análises por fase × data.
-3. Notebook 05: risco e decisão, mapas por município.
-4. Sensibilidades: CT ± 100, pesos da janela de semeadura, custo total × operacional.
+1. Restrição da colheita da soja (05/01 só com soja superprecoce): **vai para a discussão do artigo**
+   (decisão do autor, 19/10/2026), sem limitar a janela no modelo — "o mais cedo possível" é a mensagem.
+2. Entender a preferência por 15/03 na faixa de fronteira do Oeste (preço do mês de venda? geada menor?).
+3. Sensibilidades pendentes: CT ± 100 °C dia, pesos da janela de semeadura, custo total × operacional.
+4. Opcional (computacional): calibrar a profundidade de raiz/CAD da réplica para reproduzir o ZARC oficial.
 5. Escrita em inglês no modelo LaTeX da revista.

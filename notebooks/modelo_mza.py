@@ -32,6 +32,7 @@ KY = {"estabelecimento": 0.4, "vegetativo": 0.4, "floracao": 1.5, "enchimento": 
 Z_INI, Z_MAX = 0.10, 0.40  # profundidade radicular efetiva (m): cresce até o fim do vegetativo
 IAF, CC, UMIDADE = 5.0, 0.40, 13.0
 SPINUP = 30                # dias de balanço antes da semeadura (solo sob palhada, Kc inicial)
+JANELA_MAX = 300           # dias após a semeadura; sem atingir CT, o ciclo é dado como incompleto
 
 # Fases do ZARC (Portaria SPA/MAPA nº 329/2026, milho 2ª safra PR, Grupo I), em dias após a semeadura
 FASES_ZARC = {"I": (1, 20), "II": (21, 50), "III": (51, 80), "IV": (81, 100)}
@@ -67,15 +68,15 @@ def _kc(frac):
 def simular(clima_mun, lat, dta, semeadura, ct=CT):
     """Simula um ciclo. `clima_mun`: clima diário de um município indexado por data."""
     semeadura = pd.Timestamp(semeadura)
-    janela = clima_mun.loc[semeadura - pd.Timedelta(days=SPINUP): semeadura + pd.Timedelta(days=220)]
+    janela = clima_mun.loc[semeadura - pd.Timedelta(days=SPINUP): semeadura + pd.Timedelta(days=JANELA_MAX)]
     pos = janela.index >= semeadura
     campo = janela.loc[pos]
 
     gd = graus_dia(campo["Tmax"].to_numpy(), campo["Tmin"].to_numpy())
     acum = np.cumsum(gd)
-    ciclo = int(np.searchsorted(acum, ct) + 1)
-    if ciclo > len(campo):
-        raise ValueError("série climática não cobre o ciclo")
+    # Em regiões frias a soma térmica não fecha antes do inverno: a lavoura não matura (PA = 0).
+    completo = bool(acum[-1] >= ct)
+    ciclo = int(np.searchsorted(acum, ct) + 1) if completo else len(campo)
     campo = campo.iloc[:ciclo].copy()
     frac = np.minimum(acum[:ciclo] / ct, 1.0)
 
@@ -103,8 +104,10 @@ def simular(clima_mun, lat, dta, semeadura, ct=CT):
                                  ky=KY, fase=campo["fase_ky"].to_numpy())
 
     # ---- indicadores por período de D&K
-    saida = {"ciclo_dias": ciclo, "data_floracao": campo.index[campo["fase_ky"] == "floracao"][0],
-             "data_maturacao": campo.index[-1], "PPf": ppf, "PA": pa.attrs["PA"]}
+    floracao = campo.index[campo["fase_ky"] == "floracao"]
+    saida = {"ciclo_dias": ciclo, "ciclo_incompleto": not completo,
+             "data_floracao": floracao[0] if len(floracao) else pd.NaT,
+             "data_maturacao": campo.index[-1], "PPf": ppf, "PA": pa.attrs["PA"] if completo else 0.0}
     tmed = (campo["Tmax"] + campo["Tmin"]) / 2
     for nome, g in campo.groupby("fase_ky", sort=False):
         etc = g["ETc"].sum()
@@ -145,13 +148,13 @@ def criterios_zarc(janela, pos, dta):
     return out
 
 
-def simular_municipio(cod, lat, dta, arquivo_clima, anos, datas_semeadura):
+def simular_municipio(cod, lat, dta, arquivo_clima, anos, datas_semeadura, ct=CT):
     """Todas as combinações ano × data de semeadura de um município (para rodar em paralelo)."""
     clima = pd.read_parquet(arquivo_clima, filters=[("cod_ibge", "==", cod)]).set_index("data").sort_index()
     linhas = []
     for ano in anos:
         for mes, dia in datas_semeadura:
-            r = simular(clima, lat, dta, pd.Timestamp(ano, mes, dia))
+            r = simular(clima, lat, dta, pd.Timestamp(ano, mes, dia), ct=ct)
             r.update({"cod_ibge": cod, "ano": ano, "semeadura": f"{dia:02d}/{mes:02d}"})
             linhas.append(r)
     return pd.DataFrame(linhas)

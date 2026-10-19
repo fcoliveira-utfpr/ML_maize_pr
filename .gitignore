@@ -14,3 +14,8 @@ dados/xavier_diario_pr.csv.gz
 dados/xavier_diario_pr.parquet
 Artigo_milho/
 Wiley_LaTeX_Manuscript_Template_for_the_Journal_of_Agronomy_and_Crop_Science/
+
+# partes intermediárias do APSIM (o consolidado fica em resultados/simulacao_apsim_pr.parquet)
+resultados/apsim_partes/
+resultados/aquacrop_partes/
+resultados/dssat_partes/
