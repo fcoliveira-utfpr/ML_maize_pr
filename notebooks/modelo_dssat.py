@@ -1,9 +1,9 @@
-"""DSSAT CSM-CERES-Maize sem calibração (via `DSSATTools`), para o modelo híbrido.
+"""DSSAT CSM-CERES-Maize, uncalibrated (via `DSSATTools`), for the hybrid model.
 
-Uma rodada sazonal por (município, data de semeadura): 27 safras (1999–2025) semeadas na mesma data,
-cultivar genérica de ciclo curto do DSSAT, clima BR-DWGD e o mesmo perfil de solo do APSIM/AquaCrop.
-O executável do `DSSATTools` é de Linux; no macOS usa-se o DSSAT-CSM compilado do código aberto
-(`DSSAT/dssat-csm-os`), apontado em `BINARIO`.
+One seasonal run per (municipality, sowing date): 27 seasons (1999–2025) sown on the same date,
+DSSAT generic short-season cultivar, BR-DWGD weather and the same soil profile as APSIM/AquaCrop.
+The `DSSATTools` executable is for Linux; on macOS the DSSAT-CSM compiled from the open source code
+(`DSSAT/dssat-csm-os`) is used, pointed to by `BINARIO`.
 """
 import tempfile
 from datetime import date, timedelta
@@ -12,8 +12,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-# O DSSAT (Fortran) aceita caminhos de até 80 caracteres; a pasta temporária do macOS é mais longa.
-# Antes de importar o DSSATTools (que monta o DSSAT_HOME na pasta temporária), usa-se uma pasta curta.
+# DSSAT (Fortran) accepts paths of up to 80 characters; the macOS temporary folder is longer.
+# Before importing DSSATTools (which builds DSSAT_HOME in the temporary folder), a short folder is used.
 TMP_CURTO = Path.home() / ".dssat_tmp"
 TMP_CURTO.mkdir(exist_ok=True)
 tempfile.tempdir = str(TMP_CURTO)
@@ -33,9 +33,9 @@ BINARIO = Path.home() / "Python" / "dssat-csm-os" / "build" / "bin" / "dscsm048"
 if BINARIO.exists():
     dssat_run.BIN_PATH = str(BINARIO)
 
-CULTIVAR = "990003"           # SHORT SEASON (genérica do MZCER048.CUL)
-POPULACAO = 6.0               # plantas m-2
-ADUBO_N = 200                 # kg N ha-1 na semeadura (N não limitante)
+CULTIVAR = "990003"           # SHORT SEASON (generic, from MZCER048.CUL)
+POPULACAO = 6.0               # plants m-2
+ADUBO_N = 200                 # kg N ha-1 at sowing (non-limiting N)
 FRACAO_AD_INICIAL = 0.7
 ANO_INI, NYERS = 1999, 27
 BASES_CM = np.cumsum(A.ESPESSURA) / 10  # 15, 30, 60, ..., 180
@@ -90,7 +90,7 @@ def _ler_summary(txt):
 
 
 def _ler_plantgro(txt):
-    """PlantGro.OUT com um bloco por safra (cabeçalho '@YEAR DOY ...' repetido)."""
+    """PlantGro.OUT with one block per season (header '@YEAR DOY ...' repeated)."""
     blocos, cab = [], None
     for l in txt.splitlines():
         if l.startswith("@"):
@@ -132,7 +132,7 @@ def simular_municipio(cod, clima_mun, perfil, mun, datas):
                                   planting=Planting(pdate=pdate, ppop=POPULACAO, ppoe=POPULACAO, plrs=50, pldp=5),
                                   initial_conditions=ic, fertilizer=adubo, simulation_controls=ctrl, verbose=False)
             except ValueError:
-                pass  # o DSSATTools não lê tabelas com várias safras no pandas 3; os .OUT são lidos abaixo
+                pass  # DSSATTools cannot read multi-season tables with pandas 3; the .OUT files are read below
             s = _ler_summary((Path(pasta) / "Summary.OUT").read_text(errors="ignore"))
             pg = _ler_plantgro((Path(pasta) / "PlantGro.OUT").read_text(errors="ignore"))
             s["pdat"], s["adat"], s["mdat"] = _jd(s["PDAT"]), _jd(s["ADAT"]), _jd(s["MDAT"])

@@ -1,8 +1,8 @@
-"""AquaCrop (FAO; implementação AquaCrop-OSPy, pacote `aquacrop`) sem calibração, para o modelo híbrido.
+"""AquaCrop (FAO; AquaCrop-OSPy implementation, package `aquacrop`), uncalibrated, for the hybrid model.
 
-Uma simulação por (município, data de semeadura), 1999–2025, semeando todo ano na mesma data, com a
-cultura padrão `MaizeGDD` (fenologia por graus-dia), clima BR-DWGD (ETo Penman-Monteith do próprio
-BR-DWGD) e perfil de solo com LL15/DUL/SAT do mesmo procedimento usado no APSIM.
+One simulation per (municipality, sowing date), 1999–2025, sowing every year on the same date, with the
+default crop `MaizeGDD` (growing-degree-day phenology), BR-DWGD weather (BR-DWGD's own Penman-Monteith
+ETo) and a soil profile with LL15/DUL/SAT from the same procedure used for APSIM.
 """
 import numpy as np
 import pandas as pd
@@ -11,7 +11,7 @@ from aquacrop import AquaCropModel, Crop, InitialWaterContent, Soil
 import modelo_apsim as A
 
 CULTURA = "MaizeGDD"
-UMIDADE_INICIAL = 70  # % da água disponível no início da simulação
+UMIDADE_INICIAL = 70  # % of available water at the start of the simulation
 
 
 def clima(clima_mun):
@@ -30,7 +30,7 @@ def solo(perfil):
 
 
 def simular_municipio(cod, clima_mun, perfil, datas, tmin_diaria):
-    """Linhas por (ano, data) com rendimento simulado e estresse de transpiração por período."""
+    """Rows per (year, date) with simulated yield and transpiration stress per period."""
     w, s = clima(clima_mun), solo(perfil)
     linhas = []
     for mes, dia in datas:

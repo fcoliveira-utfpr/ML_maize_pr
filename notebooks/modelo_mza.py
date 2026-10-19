@@ -1,9 +1,9 @@
-"""Simulação do milho 2ª safra pelo Modelo da Zona Agroecológica da FAO (MZA-FAO).
+"""Simulation of second-season maize with the FAO Agro-Ecological Zone model (MZA-FAO).
 
-Uma simulação = (município, ano, data de semeadura), em escala diária, com o clima BR-DWGD.
-O balanço hídrico de cultura, a produtividade potencial (PPf) e a atingível (PA) vêm da
-biblioteca agrometeorologiapy (v0.3.0); aqui ficam só a fenologia por graus-dia, as curvas de
-Kc e de profundidade radicular e os indicadores agroclimáticos por fase.
+One simulation = (municipality, year, sowing date), at daily scale, with BR-DWGD weather.
+The crop water balance, potential yield (PPf) and attainable yield (PA) come from the
+agrometeorologiapy library (v0.3.0); here are only the growing-degree-day phenology, the Kc and
+rooting-depth curves and the agroclimatic indicators per phase.
 """
 import numpy as np
 import pandas as pd
@@ -16,30 +16,30 @@ from agrometeorologiapy import (
 )
 from agrometeorologiapy.produtividade import produtividade_atingivel, produtividade_potencial
 
-# ---------------------------------------------------------------- parâmetros da cultura
-TB = 10.0                 # temperatura base (°C)
-CT = 1450.0               # soma térmica da semeadura à maturação fisiológica (°C dia)
+# ---------------------------------------------------------------- crop parameters
+TB = 10.0                 # base temperature (°C)
+CT = 1450.0               # thermal time from sowing to physiological maturity (°C day)
 
-# Fases FAO-56 (Kc), em fração da soma térmica: inicial, desenvolvimento, intermediária, final
+# FAO-56 stages (Kc), as fractions of thermal time: initial, development, mid-season, late
 FASES_KC = (0.17, 0.28, 0.33, 0.22)
 KC_INI, KC_MED, KC_FIN = 0.3, 1.2, 0.6
 
-# Períodos de Doorenbos & Kassam (1979) para o ky do milho, em fração da soma térmica
+# Doorenbos & Kassam (1979) periods for maize ky, as fractions of thermal time
 FASES_KY = {"estabelecimento": 0.15, "vegetativo": 0.30, "floracao": 0.12,
             "enchimento": 0.30, "maturacao": 0.13}
 KY = {"estabelecimento": 0.4, "vegetativo": 0.4, "floracao": 1.5, "enchimento": 0.5, "maturacao": 0.2}
 
-Z_INI, Z_MAX = 0.10, 0.40  # profundidade radicular efetiva (m): cresce até o fim do vegetativo
+Z_INI, Z_MAX = 0.10, 0.40  # effective rooting depth (m): grows until the end of the vegetative phase
 IAF, CC, UMIDADE = 5.0, 0.40, 13.0
-SPINUP = 30                # dias de balanço antes da semeadura (solo sob palhada, Kc inicial)
-JANELA_MAX = 300           # dias após a semeadura; sem atingir CT, o ciclo é dado como incompleto
+SPINUP = 30                # days of water balance before sowing (soil under straw, initial Kc)
+JANELA_MAX = 300           # days after sowing; without reaching CT, the cycle is flagged incomplete
 
-# Fases do ZARC (Portaria SPA/MAPA nº 329/2026, milho 2ª safra PR, Grupo I), em dias após a semeadura
+# ZARC phases (Portaria SPA/MAPA nº 329/2026, second-season maize PR, Group I), in days after sowing
 FASES_ZARC = {"I": (1, 20), "II": (21, 50), "III": (51, 80), "IV": (81, 100)}
 
 
 def graus_dia(tmax, tmin, tb=TB):
-    """Mesma regra de `agrometeorologiapy.data_maturacao_fisiologica`."""
+    """Same rule as `agrometeorologiapy.data_maturacao_fisiologica`."""
     tmed = (tmax + tmin) / 2
     amp = np.maximum(tmax - tmin, 0.1)
     return np.where(tb < tmin, tmed - tb, np.where(tmax > tb, (tmax - tb) ** 2 / (2 * amp), 0.0))
@@ -52,7 +52,7 @@ def qo_diaria(lat, datas):
 
 
 def _fase(frac_acum, limites):
-    """Índice da fase de cada dia a partir da fração acumulada da soma térmica."""
+    """Phase index of each day from the accumulated fraction of thermal time."""
     return np.minimum(np.searchsorted(np.cumsum(limites), frac_acum, side="right"), len(limites) - 1)
 
 
@@ -66,7 +66,7 @@ def _kc(frac):
 
 
 def simular(clima_mun, lat, dta, semeadura, ct=CT):
-    """Simula um ciclo. `clima_mun`: clima diário de um município indexado por data."""
+    """Simulates one cycle. `clima_mun`: daily weather of one municipality indexed by date."""
     semeadura = pd.Timestamp(semeadura)
     janela = clima_mun.loc[semeadura - pd.Timedelta(days=SPINUP): semeadura + pd.Timedelta(days=JANELA_MAX)]
     pos = janela.index >= semeadura
@@ -74,7 +74,7 @@ def simular(clima_mun, lat, dta, semeadura, ct=CT):
 
     gd = graus_dia(campo["Tmax"].to_numpy(), campo["Tmin"].to_numpy())
     acum = np.cumsum(gd)
-    # Em regiões frias a soma térmica não fecha antes do inverno: a lavoura não matura (PA = 0).
+    # In cold regions thermal time is not reached before winter: the crop does not mature (PA = 0).
     completo = bool(acum[-1] >= ct)
     ciclo = int(np.searchsorted(acum, ct) + 1) if completo else len(campo)
     campo = campo.iloc[:ciclo].copy()
@@ -85,7 +85,7 @@ def simular(clima_mun, lat, dta, semeadura, ct=CT):
     frac_fim_veg = FASES_KY["estabelecimento"] + FASES_KY["vegetativo"]
     z = Z_INI + (Z_MAX - Z_INI) * np.clip(frac / frac_fim_veg, 0, 1)
 
-    # ---- balanço hídrico de cultura (spin-up com Kc inicial e raiz inicial)
+    # ---- crop water balance (spin-up with initial Kc and initial roots)
     pre = janela.loc[~pos]
     bh_in = pd.DataFrame({
         "Chuva": np.r_[pre["pr"].to_numpy(), campo["pr"].to_numpy()],
@@ -96,14 +96,14 @@ def simular(clima_mun, lat, dta, semeadura, ct=CT):
     for col in ["ETc", "ETR", "DEF", "EXC", "ARM"]:
         campo[col] = bh[col].to_numpy()
 
-    # ---- produtividade potencial e atingível
+    # ---- potential and attainable yield
     pp_in = pd.DataFrame({"data": campo.index, "Tmed": ((campo["Tmax"] + campo["Tmin"]) / 2).to_numpy(),
                           "Qg": campo["Rs"].to_numpy(), "Qo": qo_diaria(lat, campo.index)})
     ppf = produtividade_potencial(pp_in, lat=lat, rota="C4", IAF=IAF, Cc=CC, U=UMIDADE, intervalo="d").attrs["PPf"]
     pa = produtividade_atingivel(ppf, campo["ETR"].to_numpy(), campo["ETc"].to_numpy(),
                                  ky=KY, fase=campo["fase_ky"].to_numpy())
 
-    # ---- indicadores por período de D&K
+    # ---- indicators per D&K period
     floracao = campo.index[campo["fase_ky"] == "floracao"]
     saida = {"ciclo_dias": ciclo, "ciclo_incompleto": not completo,
              "data_floracao": floracao[0] if len(floracao) else pd.NaT,
@@ -130,7 +130,7 @@ def simular(clima_mun, lat, dta, semeadura, ct=CT):
 
 
 def criterios_zarc(janela, pos, dta):
-    """Critérios do ZARC num ciclo de referência de 100 dias (fases em dias fixos após a semeadura)."""
+    """ZARC criteria on a 100-day reference cycle (phases on fixed days after sowing)."""
     pre, ref = janela.loc[~pos], janela.loc[pos].iloc[:100]
     frac = np.arange(1, 101) / 100
     bh = balanco_hidrico_cultura(pd.DataFrame({
@@ -149,7 +149,7 @@ def criterios_zarc(janela, pos, dta):
 
 
 def simular_municipio(cod, lat, dta, arquivo_clima, anos, datas_semeadura, ct=CT):
-    """Todas as combinações ano × data de semeadura de um município (para rodar em paralelo)."""
+    """All year × sowing date combinations of one municipality (to run in parallel)."""
     clima = pd.read_parquet(arquivo_clima, filters=[("cod_ibge", "==", cod)]).set_index("data").sort_index()
     linhas = []
     for ano in anos:

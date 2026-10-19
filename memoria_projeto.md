@@ -397,11 +397,73 @@ xgboost 3.4.1 e lightgbm 4.7.0 instalados no `.venv313` (exigiu `brew install li
 - Decisão (05) com L: melhor data 05/01 em 311 municípios, 15/01 em 31, 15/03 em 27 (fronteira Oeste);
   data ótima igual à de E em 86%; τ = 0,33, r com PSR = 0,88; valor do seguro/ZARC +R$ 39 a +R$ 75/ha.
 
+## Por que 27 municípios preferem semear em 15/03 (19/10/2026) — para a discussão
+
+- Quem são: faixa lindeira ao Lago de Itaipu/fronteira do Oeste (Foz, Santa Helena, Marechal C. Rondon,
+  Guaíra, Terra Roxa…) **e o Noroeste arenoso** (Umuarama, Paranavaí: Altônia, Icaraíma, Querência do
+  Norte, Marilena…). Altitude média 299 m (× 583 m dos que preferem 05/01), DTA 90 × 114 mm/m.
+- **Não é o preço**: o índice sazonal favorece a venda cedo (abr 1,006; jul 0,952). Com preço constante
+  entre datas, a vantagem de 15/03 nesses municípios cresce (+139 → +323 R$/ha de CE) e 46 municípios
+  passam a preferir 15/03.
+- **É o calor no florescimento**: nesses municípios a semeadura em 05/01 floresce com Tmax média de 32,3 °C
+  e 1,9 dia ≥ 35 °C; em 15/03, 27,2 °C e 0,2 dia. Geada no período reprodutivo fica desprezível (0,29 dia
+  em 15/03 × 1,55 no restante do PR). Atribuição no modelo final (troca de uma variável por vez,
+  05/01 → 15/03): Δ total +0,087 em log (+9%), dos quais **calor_floracao +0,076**, ISNA no enchimento
+  +0,017, geada −0,010. No grupo 05/01, a semeadura tardia perde por geada (−0,036) e ISNA (−0,07).
+- Leitura para o artigo: o MZA sozinho preferiria a semeadura cedo (PA 1.932 kg/ha em 05/01 × 1.339 em
+  15/03 nesses municípios), porque não penaliza o calor no florescimento; **o ML do híbrido acrescenta o
+  estresse térmico** — exemplo concreto do que a correção do ML capta além da física. Ressalvas: efeito
+  aprendido da variação entre anos e extrapolado entre datas; risco de geada tardia e colheita mais cara
+  no inverno. Robusto entre versões do modelo (com E sozinho já eram 28 municípios).
+- Scripts: scratchpad da sessão (`analise_15mar.py`, `atribuicao_15mar.py`).
+
+## Sensibilidades (19/10/2026) — notebook 06, `notebooks/sensibilidade.py` (variável de ambiente SENS)
+
+| Cenário | R² mun. (L) | R² anual | Mesma melhor data que a base | Melhor 05/01 / 15/03 | Valor seguro médio |
+|---|---|---|---|---|---|
+| base (CT 1450, 4 datas iguais) | 0,427 | 0,674 | — | 311 / 27 | R$ 58 |
+| CT 1350 | 0,393 | 0,611 | 78% | 284 / 12 | R$ 65 |
+| **CT 1550** | **0,450** | **0,727** | 83% | 310 / 23 | R$ 77 |
+| janela_cedo (pesos 0,4/0,3/0,2/0,1) | 0,384 | 0,593 | 91% | 310 / 24 | R$ 83 |
+| janela_7datas (15/01–15/03) | 0,430 | 0,669 | 90% | 323 / 26 | R$ 58 |
+| custo total | — | — | 98% | — | (margem média R$ 352, P(prejuízo) 0,53) |
+| cobertura 70% / ZARC Grupo II / 10–30 dias até a venda | — | — | 99% / 95% / 90% | — | — |
+
+- Recomendação robusta: 05/01 domina em todos os cenários; 15/03 sempre na faixa Oeste/Noroeste.
+- **CT 1550 melhora o modelo** (ciclo 115 → 164 d de 05/01 a 15/03): a soma térmica de 1450 pode estar
+  curta para os híbridos atuais. Decisão pendente do autor: manter 1450 (literatura) ou adotar 1550
+  (escolha pelo próprio R² da validação = ajuste de 1 hiperparâmetro; testar 1650 antes de decidir).
+- Pesos concentrados nas datas cedo pioram (0,384): o rendimento municipal reflete semeaduras espalhadas.
+
+## Robustez: seleção automática e igual de variáveis para os 4 geradores (19/10/2026)
+
+Dentro de cada dobra (só anos de treino): top-k por |Spearman| com a anomalia, descartando redundantes
+(|r| > 0,9); HGB raso sem restrição para todos; pools só com saídas de processo (MZA 37 candidatas:
+PPf, PA, EC, ciclo, ISNA/DEF/EXC/geada/calor/Tmin por fase; APSIM 12; AquaCrop 12; DSSAT 10).
+
+| Gerador | R² k=8 | R² k=12 | Δ RMSE vs MZA (k=8; IC 95%) |
+|---|---|---|---|
+| MZA | 0,326 | 0,337 | — |
+| APSIM | 0,319 | 0,304 | +6 (−39; +51) |
+| AquaCrop | 0,245 | 0,245 | +69 (−64; +173) |
+| DSSAT | 0,330 | 0,330 | −4 (−44; +33) |
+
+- **Com seleção automática igual, MZA ≈ DSSAT ≈ APSIM**; AquaCrop de fábrica continua o pior.
+- A vantagem do MZA na comparação principal (E 0,394 × F/I 0,334) vem das variáveis escolhidas à mão
+  (ISNA por fase, PA/PPf, geada/frio/calor reprodutivo) e das restrições monotônicas — e essas variáveis
+  foram definidas após testes exploratórios nos mesmos dados (viés de seleção não separável do
+  conhecimento agronômico). Para APSIM/DSSAT, à mão e automático dão o mesmo (~0,33).
+- **Reenquadrar o achado central**: não "o MZA é o melhor gerador", e sim "o modelo mais simples, sem
+  calibração, é tão bom quanto APSIM/DSSAT; a complexidade sem calibração não acrescenta informação";
+  o ganho final vem do desenho de variáveis guiado pela agronomia + física no ML (monotonia) + ensemble.
+- Script: scratchpad da sessão (`selecao_auto.py`).
+
 ## Próximos passos
 
 1. Restrição da colheita da soja (05/01 só com soja superprecoce): **vai para a discussão do artigo**
    (decisão do autor, 19/10/2026), sem limitar a janela no modelo — "o mais cedo possível" é a mensagem.
-2. Entender a preferência por 15/03 na faixa de fronteira do Oeste (preço do mês de venda? geada menor?).
-3. Sensibilidades pendentes: CT ± 100 °C dia, pesos da janela de semeadura, custo total × operacional.
+2. ~~Preferência por 15/03~~ → explicada (calor no florescimento; ver seção acima), vai para a discussão.
+3. ~~Sensibilidades~~ → feitas. CT: **mantido 1450 no principal** (literatura); 1550 vai como sensibilidade
+   (indício de soma térmica curta para híbridos atuais). Autor dispensou o teste de 1650 (19/10/2026).
 4. Opcional (computacional): calibrar a profundidade de raiz/CAD da réplica para reproduzir o ZARC oficial.
 5. Escrita em inglês no modelo LaTeX da revista.

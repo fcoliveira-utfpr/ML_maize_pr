@@ -1,8 +1,8 @@
-"""APSIM Next Generation (Maize) sem calibração, para gerar variáveis do modelo híbrido.
+"""APSIM Next Generation (Maize), uncalibrated, to generate features for the hybrid model.
 
-Uma simulação por (município, data de semeadura), contínua de 1998-12 a 2025-12, semeando todo ano na
-mesma data. Parte do exemplo oficial `Examples/Maize.apsimx` e troca: clima (BR-DWGD), perfil físico
-do solo (granulometria do MapBiomas Solo + AWC do município), regra de semeadura e cultivar.
+One simulation per (municipality, sowing date), continuous from 1998-12 to 2025-12, sowing every year on
+the same date. Starts from the official example `Examples/Maize.apsimx` and replaces: weather (BR-DWGD),
+physical soil profile (MapBiomas Soil particle size + municipal AWC), sowing rule and cultivar.
 """
 import copy
 import json
@@ -18,16 +18,16 @@ APSIM = Path.home() / "Python" / "apsimx"
 MODELS_DLL = APSIM / "bin" / "Models.dll"
 EXEMPLO = APSIM / "Examples" / "Maize.apsimx"
 
-CULTIVAR = "A_100"           # genérica, maturidade relativa 100 d, sem sensibilidade ao fotoperíodo
-POPULACAO = 6.0              # plantas m-2
-ADUBO_N = 200.0              # kg N ha-1 na semeadura: nitrogênio não limitante (foco no clima)
+CULTIVAR = "A_100"           # generic, relative maturity 100 d, no photoperiod sensitivity
+POPULACAO = 6.0              # plants m-2
+ADUBO_N = 200.0              # kg N ha-1 at sowing: non-limiting nitrogen (focus on weather)
 INICIO, FIM = "1998-12-01", "2025-12-31"
 
-# Camadas do exemplo (mm) e camadas de 10 cm do MapBiomas Solo que caem em cada uma
+# Layers of the example (mm) and the 10-cm MapBiomas Soil layers falling in each one
 ESPESSURA = [150, 150, 300, 300, 300, 300, 300]
 MB_CAMADAS = [[1], [2], [3, 4, 5], [6, 7, 8], [9, 10], [10], [10]]
 KL = [0.08, 0.08, 0.08, 0.06, 0.06, 0.04, 0.03]
-MATERIA_ORGANICA = [2.5, 2.0, 1.5, 1.0, 0.8, 0.6, 0.5]  # % (suposição: perfil típico de Latossolo cultivado)
+MATERIA_ORGANICA = [2.5, 2.0, 1.5, 1.0, 0.8, 0.6, 0.5]  # % (assumption: typical cultivated Oxisol profile)
 
 VARIAVEIS = [
     "[Clock].Today",
@@ -42,9 +42,9 @@ VARIAVEIS = [
 ]
 
 
-# ------------------------------------------------------------------ solo
+# ------------------------------------------------------------------ soil
 def saxton_rawls(areia, argila, mo):
-    """θ1500, θ33 e θs (m3 m-3) — Saxton & Rawls (2006), frações (0–1) e MO em %."""
+    """θ1500, θ33 and θs (m3 m-3) — Saxton & Rawls (2006), fractions (0–1) and organic matter in %."""
     S, C, OM = areia, argila, mo
     t1500t = -0.024 * S + 0.487 * C + 0.006 * OM + 0.005 * S * OM - 0.013 * C * OM + 0.068 * S * C + 0.031
     t1500 = t1500t + (0.14 * t1500t - 0.02)
@@ -54,12 +54,12 @@ def saxton_rawls(areia, argila, mo):
     ts33 = ts33t + (0.636 * ts33t - 0.107)
     ts = t33 + ts33 - 0.097 * S + 0.043
     lam = (np.log(t33) - np.log(t1500)) / (np.log(1500) - np.log(33))
-    ks = 1930 * (ts - t33) ** (3 - lam) * 24  # mm/dia
+    ks = 1930 * (ts - t33) ** (3 - lam) * 24  # mm/day
     return t1500, t33, ts, ks
 
 
 def perfil(camadas_mun, dta_mm_m):
-    """Perfil físico em 7 camadas. A água disponível (DUL − LL15) é escalada para a AWC do município."""
+    """7-layer physical profile. Available water (DUL − LL15) is scaled to the municipal AWC."""
     g = camadas_mun.set_index("camada")
     areia = np.array([g.loc[c, "areia_pct"].mean() for c in MB_CAMADAS]) / 100
     argila = np.array([g.loc[c, "argila_pct"].mean() for c in MB_CAMADAS]) / 100
@@ -71,7 +71,7 @@ def perfil(camadas_mun, dta_mm_m):
     return {"LL15": ll15, "DUL": dul, "SAT": sat, "BD": bd, "KS": ks, "AirDry": np.r_[0.5 * ll15[0], ll15[1:]]}
 
 
-# ------------------------------------------------------------------ clima
+# ------------------------------------------------------------------ weather
 def escrever_met(clima_mun, lat, caminho):
     c = clima_mun.reset_index()
     tmed = (c["Tmax"] + c["Tmin"]) / 2
@@ -88,7 +88,7 @@ def escrever_met(clima_mun, lat, caminho):
     Path(caminho).write_text("\n".join(linhas) + "\n" + tab.to_string(header=False, index=False) + "\n")
 
 
-# ------------------------------------------------------------------ arquivo .apsimx
+# ------------------------------------------------------------------ .apsimx file
 def _filhos(no, tipo=None, nome=None):
     for f in no.get("Children", []):
         if (tipo is None or f.get("$type", "").startswith(tipo)) and (nome is None or f.get("Name") == nome):
@@ -101,7 +101,7 @@ def _um(no, tipo=None, nome=None):
 
 
 def montar(cod, met, solo, datas_semeadura, caminho):
-    """Um .apsimx com uma simulação por data de semeadura (mesmo município, clima e solo)."""
+    """One .apsimx with one simulation per sowing date (same municipality, weather and soil)."""
     base = json.loads(EXEMPLO.read_text())
     modelo = _um(base, "Models.Core.Simulation")
     for g in list(_filhos(modelo, "Models.Graph")):
@@ -152,14 +152,14 @@ def rodar(apsimx, cpus=1):
     return dados
 
 
-# Estádios do Maize no APSIM NG: 1 semeadura, 2 germinação, 3 emergência, 4 fim do juvenil,
-# 5 iniciação floral, 6 folha bandeira, 7 florescimento, 8 início do enchimento, 9 fim do enchimento,
-# 10 maturidade, 11 ponto de colheita.
+# Maize stages in APSIM NG: 1 sowing, 2 germination, 3 emergence, 4 end of juvenile,
+# 5 floral initiation, 6 flag leaf, 7 flowering, 8 start of grain fill, 9 end of grain fill,
+# 10 maturity, 11 harvest ripe.
 PERIODOS = {"veg": (3, 6), "flor": (6, 8), "ench": (8, 10)}
 
 
 def resumir(dados, cod):
-    """Uma linha por (ano, data de semeadura) com as variáveis do ciclo."""
+    """One row per (year, sowing date) with the cycle variables."""
     d = dados.copy()
     d["t"] = pd.to_datetime(d["Clock.Today"])
     d["estadio"] = d["Maize.Phenology.Stage"]
@@ -186,7 +186,7 @@ def resumir(dados, cod):
             lin["ap_ciclo_dias"] = (mat[0] - sem).days if len(mat) else np.nan
             for p, (e0, e1) in PERIODOS.items():
                 s = c[(c["estadio"] >= e0) & (c["estadio"] < e1)]
-                lin[f"ap_estresse_{p}"] = (1 - s["fw"]).sum() if len(s) else np.nan  # estresse hídrico acumulado
+                lin[f"ap_estresse_{p}"] = (1 - s["fw"]).sum() if len(s) else np.nan  # cumulative water stress
                 lin[f"ap_tmin_{p}"] = s["tmin"].min() if len(s) else np.nan
             linhas.append(lin)
     return pd.DataFrame(linhas)

@@ -1,4 +1,4 @@
-"""Mapas coropléticos dos municípios do Paraná sem geopandas (malha IBGE em GeoJSON + matplotlib)."""
+"""Choropleth maps of the municipalities of Paraná without geopandas (IBGE GeoJSON mesh + matplotlib)."""
 import json
 from pathlib import Path
 
@@ -22,9 +22,9 @@ def carregar_malha():
 
 
 def mapa(ax, valores, cmap="viridis", vmin=None, vmax=None, titulo=None, categorias=None, cores=None):
-    """Pinta os municípios. `valores`: Series indexada por cod_ibge.
+    """Colours the municipalities. `valores`: Series indexed by cod_ibge.
 
-    Para variáveis categóricas, passe `categorias` (ordem) e `cores` (mesma ordem).
+    For categorical variables, pass `categorias` (order) and `cores` (same order).
     """
     malha = carregar_malha()
     patches, cor = [], []
@@ -49,7 +49,7 @@ def mapa(ax, valores, cmap="viridis", vmin=None, vmax=None, titulo=None, categor
     ax.set_aspect("equal")
     ax.axis("off")
     if titulo:
-        ax.set_title(titulo, fontsize=10)
+        ax.set_title(titulo, fontsize=15)
     if categorias is None:
         return plt.cm.ScalarMappable(norm=norma, cmap=cm)
     return None

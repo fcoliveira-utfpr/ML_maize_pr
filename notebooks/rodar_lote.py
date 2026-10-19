@@ -1,4 +1,4 @@
-"""Executa um modelo de cultura para vários municípios em paralelo, com checkpoint por município."""
+"""Runs a crop model for many municipalities in parallel, with a checkpoint per municipality."""
 from pathlib import Path
 
 import pandas as pd
