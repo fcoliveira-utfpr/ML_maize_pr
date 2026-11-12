@@ -1,4 +1,4 @@
-# 🌽 Second-Season Maize in Paraná — Hybrid MZA-FAO + Machine Learning Model and Economic Risk of the Sowing Date
+# 🌽 Second-Season Maize in Paraná — Yield Modelling and Economic Risk of Sowing Date
 
 ![Visitor Count](https://komarev.com/ghpvc/?username=fcoliveira-utfpr&repo=ML_maize_pr&label=Visitors&color=0e75b6&style=flat)
 [![Made with agrometeorologiapy](https://img.shields.io/badge/made%20with-agrometeorologiapy-2e7d32?logo=python&logoColor=white)](https://github.com/fcoliveira-utfpr/agrometeorologiapy)
@@ -8,7 +8,7 @@
 ![Earth Engine](https://img.shields.io/badge/Google%20Earth%20Engine-data-34A853?logo=googleearth&logoColor=white)
 ![Status](https://img.shields.io/badge/article-in%20preparation-orange)
 
-Code and data of an article in preparation for the *Journal of Agronomy and Crop Science*. The study
+Research code, data and analyses for a study of second-season maize in Paraná. The study
 predicts the yield of **second-season (safrinha) maize in the 399 municipalities of Paraná, Brazil**,
 with a **hybrid model**: the **FAO Agro-Ecological Zone model (MZA-FAO)** computes the crop water balance
 and the potential and attainable yields, and **machine learning** corrects what the physics does not
@@ -37,6 +37,7 @@ UTFPR – Santa Helena Campus · Prof. Dr. Fabrício Correia de Oliveira
   (Tmax ≥ 35 °C), a stress the ML adds to the MZA-FAO. ZARC-linked insurance is worth R$ 39–75 ha⁻¹ (mean by sowing date).
   The modelled field-level failure frequency follows the indemnified policies of the federal insurance
   subsidy programme (PSR) between years (r = 0.88).
+- **Error structure and observed heat** — out-of-fold errors show positive spatial autocorrelation in all 23 held-out years. A fixed-effects analysis also finds a negative association between flowering heat and observed municipal yield after controlling for municipality, year and water satisfaction; this is observational because municipal records do not identify sowing dates.
 - **Sensitivity** — thermal time ± 100 °C d, sowing-window weights, total vs. operating cost, insurance
   coverage, ZARC cycle group and days to sale keep the same best date in 78–99% of the municipalities.
 
@@ -87,6 +88,7 @@ flowchart LR
 │   ├── 05_risco_decisao.ipynb         margin, SERF, P(loss), CVaR, insurance/ZARC, best date, Brier score
 │   ├── 06_sensibilidade.ipynb         sensitivity scenarios compared with the baseline
 │   ├── 07_material_suplementar.ipynb  builds and compiles the supplementary material (Tables S1–S4, Figs. S1–S2)
+│   ├── 08_estrutura_erros_calor_observado.ipynb  out-of-fold error structure and observed-yield/flowering-heat analysis
 │   ├── modelo_mza.py                  one MZA-FAO cycle: degree-day phenology, Kc, ky, roots, ZARC
 │   ├── modelo_apsim.py · modelo_aquacrop.py · modelo_dssat.py   process-model drivers
 │   ├── rodar_lote.py                  parallel runs with a checkpoint per municipality
@@ -111,7 +113,8 @@ flowchart LR
 | 5 | `05_risco_decisao` | notebooks 3 and 4, ZARC, PSR | economic risk and best date per municipality |
 | 3b | `03b_comparacao_algoritmos` | `resultados/base_treino_hibrido.parquet` | `resultados/comparacao_algoritmos.csv` |
 | 6 | `06_sensibilidade` | `resultados/sensibilidade/*` | `resultados/sensibilidade_cenarios.csv` |
-| 7 | `07_material_suplementar` | outputs of 03, 03b, 04, 05 | `supplementary.tex` / `.pdf` in the journal template folder |
+| 7 | `07_material_suplementar` | outputs of 03, 03b, 04, 05 | supplementary files in the local manuscript working folder (not tracked here) |
+| 8 | `08_estrutura_erros_calor_observado` | out-of-fold predictions, observed yields and flowering heat | error summaries, annual Moran's I, fixed-effects estimates and figures in `resultados/analises_serra/` |
 
 ## 📂 Data
 
