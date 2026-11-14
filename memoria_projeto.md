@@ -525,3 +525,37 @@ PPf, PA, EC, ciclo, ISNA/DEF/EXC/geada/calor/Tmin por fase; APSIM 12; AquaCrop 1
 9. **Bug corrigido (19/10/2026, notebook 05)**: datas fora do ZARC pagavam o prêmio do seguro sem
    indenização (o texto dizia o contrário). Agora: sem acesso ao seguro = sem indenização e sem prêmio.
    Melhor data e valor do seguro não mudaram (só a CE das datas inaptas sobe).
+
+## Teto do R² e novos testes (14/11/2026)
+
+Validação deixando um ano de fora, modelo L (script no scratchpad da sessão, `exp_r2.py`):
+- Se L acertasse a média estadual de cada ano (viés anual zerado), o R² municipal iria só de 0,427 a
+  **0,561**: o viés anual é 24% do erro² em log; **76% é dentro do ano, entre municípios**.
+- Redução do efeito do município com poucos anos (α·n/(n+3)): 0,433; variáveis do MZA suavizadas com os
+  5 vizinhos (proxy de clima médio da área de lavoura): 0,433; sensibilidade ao clima por município: 0,424;
+  tendência quadrática: 0,375 (pior). → ganhos ≤ 0,006; o R² municipal está perto do teto com clima.
+- Inconsistência no `SERRA_maize_article/main.tex`: sinal do viés de 2020/2021/2022 trocado entre a
+  seção de desempenho e a de diagnóstico de erros.
+
+## Revista-alvo: Agronomy for Sustainable Development (14/11/2026)
+
+Decisão do autor: submeter à **ASD** (Springer, modelo `sn-jnl`), com o foco no **framework de decisão
+econômica** da data de semeadura (a economia costuma ficar de fora desses estudos). Manuscrito em
+`ASD_maize_article/` (main.tex + supplementary.tex, compilam com latexmk); os rascunhos SERRA e Wiley ficam
+como histórico. Análises novas no **notebook 09** (`09_framework_decisao.ipynb`) → `resultados/framework/`,
+figuras `fig_framework`, `fig_avaliacao_probabilistica`, `fig_framework_economico`. A cadeia de margem do
+notebook 09 reproduz a do 05 (corr. do CE 0,9992).
+- Distribuição prevista calibrada: PIT plano (0,095–0,108 por decil), cobertura P10–P90 80%, CRPS 600 vs 693
+  da média histórica (CRPSS 0,13; IC −0,01 a 0,26). Conformal condicional (Mondrian por tercil da anomalia
+  prevista): pior cobertura anual 0,40 → 0,52; CRPS +1,5%.
+- Variância da margem: produtividade 74%, preço 26%, custo < 1% (DP R$ 2.505/ha).
+- Hedge natural: r(produtividade prevista, preço) = −0,45; observado sem tendência × preço jun–ago = −0,71.
+  CE médio 530 (preços pareados) vs 333 ± 70 (preços embaralhados) → +60%.
+- Custo de outras regras vs CE (rr = 2): maior produtividade média 86% iguais, −R$ 9/ha (P90 34); menor risco
+  ZARC 77%, −R$ 39 (P90 145); risco neutro 91%, −R$ 3; mistura uniforme da janela −R$ 323/ha (P90 591),
+  ~R$ 670 milhões/ano ponderando pela área (limite superior: exige soja muito precoce).
+- Estabilidade (bootstrap de 26 safras, B = 1000): P(data recomendada continua a melhor) mediana 0,90; ≥ 0,8 em
+  65% dos municípios; 05/01 mediana 0,94; 15/03 0,69; 15/01 0,46 (zona de transição).
+- Produtividade de equilíbrio 4.220 (05/01) a 4.379 kg/ha (25/02); folga 34% → 14%.
+- Não consegui ler as normas da ASD (página da Springer pede login): conferir limite do resumo, nº de
+  palavras-chave, destaques e limite de palavras antes de submeter.
