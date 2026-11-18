@@ -9,8 +9,7 @@
 ![Status](https://img.shields.io/badge/article-to%20be%20submitted%20(Agricultural%20Systems)-orange)
 
 Research code, data and analyses for the article *Sowing date as a risk-management decision in soybean–maize
-double cropping: a physics-guided, insurance-validated agro-economic framework* (to be submitted to
-**Agricultural Systems**, Elsevier).
+double cropping: a physics-guided, insurance-validated agro-economic framework* .
 
 The study ranks the sowing dates of **second-season (safrinha) maize after soybean in the 399 municipalities of
 Paraná, Brazil**, by their **risk-adjusted return**. A simple crop model, the **FAO Agro-Ecological Zone model
