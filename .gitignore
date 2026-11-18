@@ -24,3 +24,6 @@ resultados/dssat_partes/
 Wiley_LaTeX_Manuscript_Template_for_the_Journal_of_Agronomy_and_Crop_Science/
 SERRA_maize_article/
 Season-blocked validation and shortfall risk of soybean forecasts/
+
+# cache mensal do clima (regerado por notebooks/revisao_agsy/clima_retomavel.py)
+dados/xavier_cache/
