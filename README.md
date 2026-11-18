@@ -101,7 +101,6 @@ flowchart LR
 │   ├── 04_economia.ipynb              costs (DERAL + CONAB Factor Income) and real monthly prices
 │   ├── 05_risco_decisao.ipynb         margin, SERF, P(loss), CVaR, insurance/ZARC (PSR rule), τ by mesoregion, best date
 │   ├── 06_sensibilidade.ipynb         sensitivity scenarios (thermal time, window, rooting depth) vs. baseline
-│   ├── 07_material_suplementar.ipynb  earlier supplementary builder (kept for provenance)
 │   ├── 08_estrutura_erros_calor_observado.ipynb  error structure and observed-yield/flowering-heat analysis
 │   ├── 09_framework_decisao.ipynb     probabilistic evaluation, risk decomposition, natural hedge, stability, framework figures
 │   ├── 10_revisao_agsy.ipynb          revision analyses: PSR sowing-date profile, IBGE calendar check, covariate shift,
