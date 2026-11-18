@@ -29,7 +29,10 @@ FASES_KY = {"estabelecimento": 0.15, "vegetativo": 0.30, "floracao": 0.12,
             "enchimento": 0.30, "maturacao": 0.13}
 KY = {"estabelecimento": 0.4, "vegetativo": 0.4, "floracao": 1.5, "enchimento": 0.5, "maturacao": 0.2}
 
-Z_INI, Z_MAX = 0.10, 0.40  # effective rooting depth (m): grows until the end of the vegetative phase
+from sensibilidade import PARAM as _PARAM
+
+Z_INI = 0.10               # effective rooting depth (m) at sowing
+Z_MAX = _PARAM.get("z_max", 0.40)  # maximum effective rooting depth (m), reached at the end of the vegetative phase
 IAF, CC, UMIDADE = 5.0, 0.40, 13.0
 SPINUP = 30                # days of water balance before sowing (soil under straw, initial Kc)
 JANELA_MAX = 300           # days after sowing; without reaching CT, the cycle is flagged incomplete
@@ -63,6 +66,15 @@ def _kc(frac):
         [KC_INI, KC_INI + (KC_MED - KC_INI) * (frac - a) / (b - a), KC_MED],
         KC_MED + (KC_FIN - KC_MED) * np.clip((frac - c) / (1 - c), 0, 1),
     )
+
+
+def _maior_sequencia(mascara):
+    """Length of the longest run of True values."""
+    melhor = atual = 0
+    for v in mascara:
+        atual = atual + 1 if v else 0
+        melhor = max(melhor, atual)
+    return melhor
 
 
 def simular(clima_mun, lat, dta, semeadura, ct=CT):
@@ -123,6 +135,10 @@ def simular(clima_mun, lat, dta, semeadura, ct=CT):
             f"UR_{nome}": g["RH"].mean(),
             f"geada_{nome}": int((g["Tmin"] <= 2.0).sum()),
             f"calor_{nome}": int((g["Tmax"] >= 35.0).sum()),
+            # stage-specific extreme indices (cf. Wang et al., 2027, Agric. Syst. 241, 105072)
+            f"seca_seq_{nome}": _maior_sequencia(g["pr"].to_numpy() < 5.0),        # longest run of days with rain < 5 mm
+            f"frio_acum_{nome}": float(np.clip(8.0 - g["Tmin"], 0, None).sum()),   # cold degree-days below Tmin 8 °C
+            f"calor_acum_{nome}": float(np.clip(g["Tmax"] - 32.0, 0, None).sum()),  # heat degree-days above Tmax 32 °C
         })
 
     saida.update(criterios_zarc(janela, pos, dta))

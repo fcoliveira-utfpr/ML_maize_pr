@@ -14,6 +14,9 @@ CENARIOS = {
     # thermal time from sowing to maturity (main: 1450 °C day)
     "CT1350": {"ct": 1350.0},
     "CT1550": {"ct": 1550.0},
+    # maximum effective rooting depth of the water balance (main: 0.40 m)
+    "Z060": {"z_max": 0.60},
+    "Z080": {"z_max": 0.80},
     # weights of the dates in the window mean that represents the municipal yield (main: 4 equal dates)
     "janela_cedo": {"pesos_janela": {"15/01": 0.4, "05/02": 0.3, "25/02": 0.2, "15/03": 0.1}},
     "janela_7datas": {"pesos_janela": {d: 1.0 for d in JANELA_ZARC}},

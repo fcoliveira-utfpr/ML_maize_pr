@@ -559,3 +559,104 @@ notebook 09 reproduz a do 05 (corr. do CE 0,9992).
 - Produtividade de equilíbrio 4.220 (05/01) a 4.379 kg/ha (25/02); folga 34% → 14%.
 - Não consegui ler as normas da ASD (página da Springer pede login): conferir limite do resumo, nº de
   palavras-chave, destaques e limite de palavras antes de submeter.
+
+## Revista-alvo: Agricultural Systems (Elsevier) — revisão de 17/11/2026
+
+Decisão do autor: trocar a ASD pela **Agricultural Systems** (modelo `cas-sc` em `../els-cas-templates/`; artigo anterior
+em `../artigo_springer/`; 13 artigos AgSy 2026–27 de referência em `../referencias/`). Parecer recebido (escrito para a ASD)
+com críticas de escopo, metodologia e acabamento. Scripts da revisão em `notebooks/revisao_agsy/` (README lá);
+saídas em `resultados/revisao/`. Ambiente agora é **Windows** (Python 3.13 do sistema; MiKTeX); o Earth Engine funciona
+(`mapbiomas-brazil`). O clima diário foi re-extraído pelo notebook 01 (rodando em 17/11).
+
+### Achados
+- **PSR por apólice** (124 mil, 2016–2025; início de vigência ≈ data de semeadura): indenização sobe de 19% (≤ 20/jan)
+  para 48% (≥ 1º/mar) nos 27 municípios do "15/03", igual ao resto do PR (efeito fixo de ano: +10,9 p.p.). IBGE: −1,4%
+  de produtividade por 10 dias de atraso. **O 15/03 era artefato.**
+- Treinar com o calendário observado (V1 ponderado, V2/V3 sorteio de datas) não corrige: o ML aprende só a variação
+  entre anos; a queda do **potencial** (PPf) com a data não é identificável no IBGE. **Correção adotada**: termo físico
+  β·[log PPf(data) − média da janela], **β = 1 sem calibrar** → reproduz PSR (+1,7 vs +1,6 p.p./10 d) e IBGE
+  (−1,5% vs −1,4%/10 d). Com ele + τ regional + números aleatórios comuns: 05/01 melhor em 365 municípios, 15/03 em 2.
+  Resta: o modelo põe o pico de risco em fevereiro e o PSR em março → índices de extremos (veranico/frio) na nova rodada.
+- **τ por mesorregião** (decisão do autor: principal): Oeste 0,25; Centro-Ocidental 0,31; Norte Central 0,36;
+  Norte Pioneiro 0,58; Noroeste 0,72 (τ geral recalibrado 0,40; antes 0,33). Seleção adversa: adesão ao seguro × P(prejuízo)
+  ρ = 0,46; produtividade esperada das apólices 6% acima do IBGE.
+- **ZARC usa raiz efetiva de 60 cm** (Portaria SPA/MAPA nº 329, 28/07/2026, DOU 30/07/2026); o MZA usa 40 cm →
+  cenários Z060/Z080 criados (`sensibilidade.py`; `modelo_mza.py` lê `z_max`).
+- Contrato a termo (preço de janeiro, versão não viesada): hedge de 30–50% sobe o CE (557 × 530); 100% derruba (487) e
+  piora o CVaR; reduz a dominância de 05/01 (sazonalidade do preço de colheita).
+- Soja: CE de 05/01 vs ≥ 05/02 = R$ 408/ha ≈ 214 kg/ha de soja (6,8%) — **refazer com β = 1**.
+- Covariate shift em todas as datas (12–33% além do P99 do treino): a média da janela comprime a variância.
+- Gap de decisão vs calendário atual (PSR 2022–25), β = 1: R$ 371/ha, ~R$ 954 milhões/ano, e CVaR melhor.
+- Validação por estresse: seca RMSE 1.188 e cobertura 0,64 (conformal por classe → 0,77); calor é onde o híbrido perde para B.
+
+### Decisões do autor (17/11)
+Corrigir o modelo (não só discutir); τ por mesorregião no principal; incluir as análises inspiradas na AgSy: fronteira
+eficiente margem × CVaR, gap de decisão, validação por estresse + conformal por classe, índices de extremos por fase,
+cauda/CV por data e região, SHAP por mesorregião.
+
+### Próximos passos (em ordem)
+1. Clima pronto → rodar MZA com Z060 (e Z080) + novos índices de extremos por fase (maior sequência seca, frio acumulado).
+2. Incorporar no notebook 03 o termo β·ΔlogPPf na predição por data; 05 com τ regional e números aleatórios comuns.
+3. Notebook 10 (a partir de `notebooks/revisao_agsy/`) com todas as análises e figuras novas; refazer break-even da soja.
+4. Artigo novo em `../artigo_elsevier/` (cas-sc; resumo estruturado CONTEXT/OBJECTIVE/METHODS/RESULTS AND CONCLUSIONS/
+   SIGNIFICANCE; 5 highlights; graphical abstract), corrigindo o checklist do parecer (Tabela 1, símbolos, figs. 2/3/4b/9b,
+   373 × 372 municípios, sinais do CVaR, referências Embrapa 2023/Monteiro 2021/CONAB 2025, portaria do ZARC).
+- (17/11, noite) `../artigo_elsevier/` criado: `main.tex` esqueleto cas-sc (compila com latexmk; precisa da pasta
+  `thumbnails/`), `references.bib` com Embrapa 2023 (Amaral et al., Documentos 279), Monteiro 2021, CONAB 2025 e
+  portaria 329/2026 corrigidos + 11 artigos AgSy 2026–27 via Crossref (chaves liu2027, wang2027apsim, dossantos2027,
+  chiduwa2026, hu2026gap, hu2026systems, ye2027, yang2026, wei2027, zhang2027drought, wang2027pareto). Texto ainda não escrito.
+- Se o clima (notebook 01) não terminou ou falhou por queda de internet: rodar de novo o notebook 01 (~20 min, Earth Engine);
+  a saída é `dados/xavier_diario_pr.csv.gz`.
+
+### 18/11/2026
+- Clima re-extraído com `notebooks/revisao_agsy/clima_retomavel.py` (cache mensal em `dados/xavier_cache/`; a 1ª tentativa
+  travou numa queda de rede). 3.947.307 linhas, igual à original.
+- Kernel Jupyter `milho_pr` instalado no Windows; MZA rodando por `notebooks/revisao_agsy/rodar_mza.py` (base, Z060, Z080),
+  com 3 índices novos por fase em `modelo_mza.py`: `seca_seq_*` (maior sequência chuva < 5 mm), `frio_acum_*`
+  (Σ max(0, 8 − Tmin)), `calor_acum_*` (Σ max(0, Tmax − 32)). Experimento em `revisao_agsy/rev6.py`.
+- Notebooks editados: 03 (termo β·ΔlogPPf na predição por data, β = 1); 05 (τ por mesorregião a partir de
+  `dados/psr_milho2safra_pr_municipio_ano.csv`, números aleatórios comuns, **produtividade segurada pela regra do PSR** =
+  média municipal, igual para todas as datas — decisão do autor). Efeito da regra do PSR: 05/01 em 361 municípios (365 antes),
+  gap vs calendário atual R$ 261/ha (~R$ 670 mi/ano) em vez de R$ 371 — o seguro subsidia em parte o plantio tardio.
+- Backup dos resultados anteriores em `resultados/_antes_revisao/`. Notebook 09 ainda usa produtividade segurada por data (ajustar).
+- Raiz × índices de extremos (`revisao_agsy/rev6.py`, `resultados/revisao/raiz_extremos.csv`): **0,40 m tem o melhor R²**
+  (0,427; 0,60 m 0,421; 0,80 m 0,410) → mantido 0,40 m, 0,60 m (convenção ZARC) como sensibilidade. Índices de extremos
+  (seca_seq, frio_acum, calor_acum) **pioram** o R² (0,414) e não corrigem o perfil de risco → fora do modelo (relatar como testados).
+- Perfil do risco por data (efeitos fixos de município e safra): PSR sobe continuamente jan → mar (+0,10 em 25/03); modelo
+  sobe até 25/02 (+0,16) e cai em março (+0,01). Defasagem da vigência (0–21 d, `rev7.py`) não explica. Calibrar a resposta
+  à data no PSR (`rev8.py`: 8 parâmetros ou 1 linear) melhora o formato mas não o Brier fora da amostra e é instável →
+  **não adotado**. Decisão técnica: modelo físico (β = 1) sem calibração por data; PSR como validação independente; limitação
+  declarada (risco de março subestimado; balanço hídrico simples melhora no outono; sem veranico de inverno nem pragas);
+  recomendação 05/01 robusta (modelo e PSR concordam). Rodando 03 → 05 → 09 (18/11).
+- **Rodada final (18/11, tarde)**: 03 → 05 → 09 → **10_revisao_agsy.ipynb** (novo; lê só agregados do PSR:
+  `dados/psr_milho2safra_pr_celulas.csv` e `..._municipio_ano.csv`). Resultados-chave:
+  melhor data 05/01 em 359 municípios, 15/01 em 11, 15/03 em 2 (27 sem data apta); τ: Oeste 0,26, Centro-Ocid. 0,30,
+  Norte Central 0,30, Norte Pioneiro 0,56, Noroeste 0,58, estado 0,37; r PSR 0,87; estabilidade bootstrap mediana 0,94;
+  hedge natural CE 532 vs 387 (preços embaralhados); mistura uniforme perde R$ 380/ha.
+  IBGE × calendário PSR: −2,0%/10 d observado = −2,0% modelo β=1 (β=0: −1,1%). Perfil PSR vs modelo: PSR sobe até mar
+  (+0,12), modelo pico em 25/02 (+0,20) e cai em mar → limitação declarada. Indenizações ≥ 1º/mar: seca 33%, geada 11%.
+  Gap de decisão vs calendário atual: R$ 278/ha CE, +R$ 612 margem, +R$ 101 CVaR, −3,3 p.p. P(prejuízo), ~R$ 710 mi/ano.
+  Soja: milho em 05/01 vs ≥ 05/02 paga 232 kg/ha de soja (7%); ≥ 25/02: 287 kg/ha (9%).
+  Termo (preço jan não viesado): h 0,25–0,5 → CE +25, CVaR +100–127; h = 1 → CE −44, CVaR −68; 05/01 cai de 359 a 305 mun.
+  Validação por estresse: seca cobertura 0,64 → 0,77 com conformal por classe. SHAP por mesorregião: frio/geada 26–30% no
+  Centro-Sul/Sudeste; água no enchimento 25–26% no Noroeste/Norte Pioneiro.
+  Figuras novas: `fig_resposta_data_psr.png`, `fig_sistema_decisao.png` (copiadas para `../artigo_elsevier/figuras/`).
+  **Próximo passo: redação do artigo em `../artigo_elsevier/main.tex`.**
+- **Redação (18/11, tarde)**: `../artigo_elsevier/main.tex` escrito por inteiro (cas-sc; resumo estruturado ~380 palavras;
+  5 highlights; graphical abstract = fig_framework; 10 figuras; Tabelas 1–4). Sem coautores/ORCID/financiamento/agradecimentos
+  (decisão do autor). Referências novas: mckinnon1967, lapan1994, goodwin1993, just1999 (Crossref). r yield×preço jun–ago sem
+  tendência recalculado: −0,74. Pendências: Tabela 4 (sensibilidade) com marcadores \tbd até terminar a rodada SENS
+  (CT1350, CT1550, janela_cedo, janela_7datas, Z060 → cópias em scratchpad/sens_runs); suplementar precisa das novas
+  Tabelas S9 (variantes calendário/raiz/extremos), S10 (SHAP por mesorregião), S11 (calibração PSR), S12 (covariate shift),
+  S13 (cauda/CV) e Fig. S6 (correlação por fase). Figuras do notebook 09 corrigidas (rótulos do painel b, legenda do mapa).
+- **Versão completa (18/11, 13h30)**: Tabela 4 preenchida com a rodada SENS na cadeia nova (CT1350 R² 0,393, 90% mesma data,
+  05/01 em 337; CT1550 0,450, 96%, 366; Z060 0,421, 99%, 363; Z080 0,410, 98%, 364; janela_cedo 0,384, 97%, 362;
+  janela_7datas 0,430, 97%, 365; 15/03 = 2 em todos). Notebook 06 com rótulos Z060/Z080; `fig_sensibilidade_ce.png` atualizada.
+  `main.pdf` (23 p.) e `supplementary.pdf` (10 p., gerado por `notebooks/revisao_agsy/montar_suplementar.py`) compilam sem
+  pendências. Falta só o que o autor fornecerá: coautores, ORCID, financiamento, agradecimentos.
+- **Pacote de submissão (18/11)**: `../agsy_submission_overleaf.zip` (21 MB; gerado por
+  `notebooks/revisao_agsy/montar_pacote_overleaf.py`): main.tex, supplementary.tex, cover_letter.tex (carta ao editor),
+  references.bib, classe CAS + thumbnails/, figuras/, elsevier_upload/ (graphical_abstract + Figure01–10 na ordem do
+  artigo) e LEIA-ME.txt. Testado: extraído numa pasta vazia, os 3 documentos compilam (22, 10 e 2 páginas). Figuras do
+  main com `[pos=!htbp]` (a classe CAS ignora `[H]` em figuras); tabelas com `[H]`. README reescrito para o artigo AgSy;
+  `statsmodels` adicionado ao requirements.txt.
