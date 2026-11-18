@@ -660,3 +660,7 @@ cauda/CV por data e região, SHAP por mesorregião.
   artigo) e LEIA-ME.txt. Testado: extraído numa pasta vazia, os 3 documentos compilam (22, 10 e 2 páginas). Figuras do
   main com `[pos=!htbp]` (a classe CAS ignora `[H]` em figuras); tabelas com `[H]`. README reescrito para o artigo AgSy;
   `statsmodels` adicionado ao requirements.txt.
+- **Limpeza do repositório (18/11, decisão do autor)**: `resultados/analises_serra` → `resultados/estrutura_erros`
+  (notebook 08 ajustado e reexecutado); notebook 07 removido (substituído por `revisao_agsy/montar_suplementar.py`);
+  `Artigo_milho/` (TCCs) e `dados/xavier_cache/` fora do Git (arquivos locais mantidos; continuam no histórico antigo).
+  Commits d5288ab e 25562be enviados ao GitHub.
