@@ -49,7 +49,7 @@ def mapa(ax, valores, cmap="viridis", vmin=None, vmax=None, titulo=None, categor
     ax.set_aspect("equal")
     ax.axis("off")
     if titulo:
-        ax.set_title(titulo, fontsize=15)
+        ax.set_title(titulo, fontsize=16)
     if categorias is None:
         return plt.cm.ScalarMappable(norm=norma, cmap=cm)
     return None
